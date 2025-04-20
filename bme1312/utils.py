@@ -254,3 +254,9 @@ def compute_ssim(reconstructed_im, target_im, is_minmax=False):
             data_range= target_im.max() - target_im.min())
 
     return ssim_value
+
+def lr_scheduler(lr,warmup_epochs, warmup_lr, initial_lr, num_epochs):
+    if lr < warmup_epochs:
+        return warmup_lr + lr * (initial_lr - warmup_lr) / warmup_epochs
+    else:
+        return initial_lr * 0.5 * (1 + np.cos((lr - warmup_epochs) * np.pi / (num_epochs - warmup_epochs)))
