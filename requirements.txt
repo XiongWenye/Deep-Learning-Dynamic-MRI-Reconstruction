@@ -1,0 +1,12 @@
+numpy
+jupyter
+matplotlib
+torch
+tensorboard
+torchvision
+PIL
+tqdm
+math
+os
+functools
+collections
