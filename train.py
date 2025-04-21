@@ -117,12 +117,10 @@ class UNet(nn.Module):
         features = init_features
         
         # Improved dropout strategy with slightly lower rate
-        self.dropout = nn.Dropout(p=0.2)
+        self.dropout = nn.Dropout(p=0.3)
         
-        # Add Leaky ReLU instead of ReLU for better gradient flow
         self.activation = nn.LeakyReLU(negative_slope=0.1, inplace=True)
         
-        # Add instance normalization option for better training stability
         self.encoder1 = self._block(in_channels, features, name="enc1")
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.encoder2 = self._block(features, features * 2, name="enc2")
@@ -154,7 +152,6 @@ class UNet(nn.Module):
         self._initialize_weights()
 
     def forward(self, x):
-        # Add print statements to debug sizes
         batch_size = x.shape[0]
 
         # Encoder path
@@ -238,14 +235,49 @@ class UNet(nn.Module):
         )
         
     def _attention_block(self, features):
-        # Simple channel attention mechanism
-        return nn.Sequential(
-            nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(features, features // 8, kernel_size=1),
-            nn.LeakyReLU(negative_slope=0.1, inplace=True),
-            nn.Conv2d(features // 8, features, kernel_size=1),
-            nn.Sigmoid()
-        )
+        # Create an actual Module instead of just a function
+        class AttentionModule(nn.Module):
+            def __init__(self, features):
+                super().__init__()
+                # Channel Attention Module (SE-like)
+                self.channel_avg_pool = nn.AdaptiveAvgPool2d(1)
+                self.channel_max_pool = nn.AdaptiveMaxPool2d(1)
+                
+                self.channel_shared_mlp = nn.Sequential(
+                    nn.Conv2d(features, features // 4, kernel_size=1, bias=False),
+                    nn.LeakyReLU(negative_slope=0.1, inplace=True),
+                    nn.Conv2d(features // 4, features, kernel_size=1, bias=False)
+                )
+                
+                # Spatial Attention Module
+                self.spatial_attention = nn.Sequential(
+                    nn.Conv2d(2, 1, kernel_size=7, padding=3, bias=False),
+                    nn.BatchNorm2d(1),
+                    nn.Sigmoid()
+                )
+                
+            def forward(self, x):
+                # Channel attention
+                avg_pool = self.channel_avg_pool(x)
+                max_pool = self.channel_max_pool(x)
+                
+                avg_out = self.channel_shared_mlp(avg_pool)
+                max_out = self.channel_shared_mlp(max_pool)
+                
+                channel_attention = torch.sigmoid(avg_out + max_out)
+                x_channel = x * channel_attention
+                
+                # Spatial attention
+                avg_out = torch.mean(x_channel, dim=1, keepdim=True)
+                max_out, _ = torch.max(x_channel, dim=1, keepdim=True)
+                spatial_in = torch.cat([avg_out, max_out], dim=1)
+                spatial_weight = self.spatial_attention(spatial_in)
+                
+                # Final output with both attention mechanisms applied
+                return x_channel * spatial_weight
+        
+        # Create and return an instance of the attention module
+        return AttentionModule(features)
         
     def _initialize_weights(self):
         for m in self.modules():
@@ -487,12 +519,11 @@ def train(in_channels,
         os.makedirs(os.path.join(base_dir, sub_dir), exist_ok=True)
 
     
-    if torch.cuda.is_available():
-        inputs = inputs.to('cuda')
-        labels = labels.to('cuda')
-        model = model.to('cuda')
-        model2 = model2.to('cuda')
-        model3 = model3.to('cuda')
+    inputs = inputs.to('cuda')
+    labels = labels.to('cuda')
+    model = model.to('cuda')
+    model2 = model2.to('cuda')
+    model3 = model3.to('cuda')
 
     writer = SummaryWriter()
 
@@ -503,8 +534,6 @@ def train(in_channels,
     
     param_list = list(model.parameters()) + list(model2.parameters()) + list(model3.parameters())
     optimizer = optim.Adam(param_list, lr=initial_lr, weight_decay=weight_decay)
-    # optimizer = optim.Adam(param_list, lr=initial_lr)
-
 
     dataset = TensorDataset(inputs, labels)
 
@@ -652,7 +681,7 @@ def train(in_channels,
 train(in_channels=20,
       out_channels=20,
       init_features=64,
-      num_epochs=300,
+      num_epochs=500,
       weight_decay=1e-4,
       batch_size=10,
       initial_lr=1e-4,
