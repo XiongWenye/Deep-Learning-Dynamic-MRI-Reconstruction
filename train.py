@@ -26,6 +26,90 @@ from functools import partial
 
 from bme1312.utils  import lr_scheduler,compute_psnr, compute_ssim
 
+def variable_density_mask(shape, acceleration=5, center_lines=11, seed=42):
+    """
+    Generate a variable density random undersampling pattern
+    
+    Args:
+        shape: Shape of the mask (batch, frames, height, width)
+        acceleration: Acceleration factor (default: 5)
+        center_lines: Number of central k-space lines to sample (default: 11)
+        seed: Random seed for reproducibility
+        
+    Returns:
+        Variable density undersampling mask with 1s in sampled positions and 0s elsewhere
+    """
+    np.random.seed(seed)
+    mask = np.zeros(shape, dtype=np.float32)
+    
+    # Calculate how many lines to sample for each frame
+    total_lines = shape[2]  # k-space height
+    sampled_lines = total_lines // acceleration  # Number of lines to sample per frame
+    
+    # Ensure we have enough lines to sample
+    if sampled_lines < center_lines:
+        sampled_lines = center_lines
+        print(f"Warning: Acceleration factor too high, setting to {total_lines / center_lines}")
+    
+    for b in range(shape[0]):
+        for f in range(shape[1]):
+            # Sample different lines for each frame for incoherent artifacts
+            # Always include central k-space lines
+            center_offset = total_lines // 2 - center_lines // 2
+            mask[b, f, center_offset:center_offset+center_lines, :] = 1.0
+            
+            # Calculate number of remaining lines to sample
+            remaining_lines = sampled_lines - center_lines
+            
+            # Create a probability density that decreases away from the center
+            prob_density = np.zeros(total_lines)
+            for i in range(total_lines):
+                # Quadratic variable density
+                dist_from_center = abs(i - total_lines//2) / (total_lines//2)
+                prob_density[i] = (1.0 - dist_from_center)**2
+                
+            # Zero out the central lines that are already sampled
+            prob_density[center_offset:center_offset+center_lines] = 0
+            
+            # Normalize to create a probability distribution
+            prob_density = prob_density / np.sum(prob_density)
+            
+            # Randomly select remaining lines with higher probability for center
+            random_lines = np.random.choice(
+                np.arange(total_lines), 
+                size=remaining_lines, 
+                replace=False, 
+                p=prob_density
+            )
+            
+            # Fill in the selected lines
+            mask[b, f, random_lines, :] = 1.0
+    
+    # Add visualization code to plot the mask
+    if shape[0] > 0 and shape[1] > 0:
+        plt.figure(figsize=(12, 5))
+        
+        # Plot mask for one dynamic frame
+        plt.subplot(1, 2, 1)
+        plt.imshow(mask[0, 0], cmap='gray')
+        plt.title('Undersampling Mask (Single Frame)')
+        plt.xlabel('kx')
+        plt.ylabel('ky')
+        
+        # Plot ky-t dimension (central slice in kx)
+        plt.subplot(1, 2, 2)
+        ky_t_view = mask[0, :, :, mask.shape[3]//2]
+        plt.imshow(ky_t_view, cmap='gray', aspect='auto')
+        plt.title('ky-t Undersampling Pattern')
+        plt.xlabel('t (frame)')
+        plt.ylabel('ky')
+        
+        plt.savefig('undersampling_mask.png')
+        plt.close()
+    
+    return mask
+
+
 class UNet(nn.Module):
 
     def __init__(self, in_channels=3, out_channels=1, init_features=32):
@@ -33,7 +117,7 @@ class UNet(nn.Module):
 
         features = init_features
         
-        # self.dropout=  nn.Dropout(p = 0.3)
+        self.dropout = nn.Dropout(p = 0.3)
         
         self.encoder1 = UNet._block(in_channels, features, name="enc1")
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -69,15 +153,15 @@ class UNet(nn.Module):
 
     def forward(self, x):
         enc1 = self.encoder1(x)
-        # enc1 = self.dropout(enc1)
+        enc1 = self.dropout(enc1)
         enc2 = self.encoder2(self.pool1(enc1))
-        # enc2 = self.dropout(enc2)
+        enc2 = self.dropout(enc2)
         
         enc3 = self.encoder3(self.pool2(enc2))
-        # enc3 = self.dropout(enc3)
+        enc3 = self.dropout(enc3)
         
         enc4 = self.encoder4(self.pool3(enc3))
-        # enc4 = self.dropout(enc4)
+        enc4 = self.dropout(enc4)
         
 
         bottleneck = self.bottleneck(self.pool4(enc4))
@@ -224,6 +308,9 @@ class ResNet(nn.Module):
                  widen_factor=1.0):
         super().__init__()
 
+        if isinstance(block_inplanes, int):
+            block_inplanes = [block_inplanes, block_inplanes*2, block_inplanes*4, block_inplanes*8]
+            
         block_inplanes = [int(x * widen_factor) for x in block_inplanes]
 
         self.in_planes = block_inplanes[0]
@@ -304,7 +391,7 @@ class ResNet(nn.Module):
         return torch.sigmoid(x)
     
 def resnet18(**kwargs):
-    model = ResNet(BasicBlock, [1, 1, 1, 1], 20, **kwargs)
+    model = ResNet(BasicBlock, [1, 1, 1, 1], [20,40,80,160], **kwargs)
     return model
 
 
@@ -333,31 +420,54 @@ def imsshow(imgs, flag, titles=None, num_col=5, dpi=100, cmap=None, is_colorbar=
     plt.close('all')
 
 def process_data():
-
     dataset = np.load('./cine.npz')['dataset']
     labels = torch.Tensor(dataset)
     
-
-    mask = cartesian_mask(shape=(200, 20, 192, 192), acc=6, sample_n=10, centred=True)
+    # Create variable density mask with acceleration factor 5
+    mask = variable_density_mask(shape=(1, 20, 192, 192), acceleration=5, center_lines=11)
     mask = torch.Tensor(mask)
     
-
+    # Apply mask to k-space data
     inputs_k = lab.image2kspace(labels)
     inputs_k = inputs_k * mask
     inputs = lab.kspace2image(inputs_k)
     inputs = lab.complex2pseudo(inputs)
     
     inputs2 = lab.pseudo2real(inputs).unsqueeze(2)
-    inputs = torch.cat((inputs, inputs2), dim = 2)
+    inputs = torch.cat((inputs, inputs2), dim=2)
     
-    return (inputs, labels,mask) 
+    # Visualize original and undersampled images
+    for i in range(min(3, labels.shape[0])):  # Show first 3 images
+        plt.figure(figsize=(15, 5))
+        
+        plt.subplot(1, 3, 1)
+        plt.imshow(labels[i, 0].numpy(), cmap='gray')
+        plt.title('Fully Sampled Image')
+        plt.colorbar()
+        
+        plt.subplot(1, 3, 2)
+        plt.imshow(inputs[i, 0, 0].numpy(), cmap='gray')
+        plt.title('Undersampled Image (Real)')
+        plt.colorbar()
+        
+        plt.subplot(1, 3, 3)
+        plt.imshow(np.abs(mask[0, 0].numpy()), cmap='gray')
+        plt.title('Sampling Mask')
+        plt.colorbar()
+        
+        plt.savefig(f'comparison_image_{i}.png')
+        plt.close()
+    
+    return (inputs, labels, mask) 
 
 def train(in_channels, 
           out_channels,
           init_features,
           num_epochs,
           weight_decay,
-          batch_size,initial_lr
+          batch_size,
+          initial_lr,
+          loss_tpe
           ):
     inputs, labels,mask = process_data()
     model = UNet(in_channels= in_channels, out_channels = out_channels, init_features = init_features)
@@ -384,7 +494,10 @@ def train(in_channels,
 
     writer = SummaryWriter()
 
-    criterion = nn.MSELoss()
+    if loss_tpe == 'L2':
+        criterion = nn.MSELoss()
+    elif loss_tpe == 'L1':
+        criterion = nn.L1Loss()
     
     param_list = list(model.parameters()) + list(model2.parameters()) + list(model3.parameters())
     optimizer = optim.Adam(param_list, lr=initial_lr, weight_decay=weight_decay)
@@ -480,13 +593,13 @@ def train(in_channels,
             full_sampling_filename = os.path.join(base_dir, 'full_sampling', f'full_sampling_{index}.png')
             reconstruction_filename = os.path.join(base_dir, 'reconstruction', f'reconstruction_{index}.png')
             
-            imsshow(np.array(x[0, :, 2].to('cpu')), num_col=5, cmap='gray', flag="under_sampling", is_colorbar=True,  save_path=under_sampling_filename)
-            imsshow(np.array(y[0].to('cpu')), num_col=5, cmap='gray', flag="full_sampling", is_colorbar=True, save_path=full_sampling_filename)
-            imsshow(np.array(outputs[0].to('cpu')), num_col=5, cmap='gray', flag="reconstruction", is_colorbar=True,  save_path=reconstruction_filename)
+            imsshow(x[0, :, 2].to('cpu').numpy(), num_col=5, cmap='gray', flag="under_sampling", is_colorbar=True,  save_path=under_sampling_filename)
+            imsshow(y[0].to('cpu').numpy(), num_col=5, cmap='gray', flag="full_sampling", is_colorbar=True, save_path=full_sampling_filename)
+            imsshow(outputs[0].to('cpu').numpy(), num_col=5, cmap='gray', flag="reconstruction", is_colorbar=True,  save_path=reconstruction_filename)
             for i in range(x.size(0)):
                 a.append( criterion(outputs[i], y[i]).item() )
-                b.append( compute_psnr(np.array(outputs[i].to('cpu')), np.array(y[i].to('cpu'))) )
-                c.append(compute_ssim(np.array(outputs[i].to('cpu')), np.array(y[i].to('cpu'))) )
+                b.append(compute_psnr(outputs[i].to('cpu').numpy(), y[i].to('cpu').numpy()))
+                c.append(compute_ssim(outputs[i].to('cpu').numpy(), y[i].to('cpu').numpy()))
             index+=1
         
         a = torch.Tensor(a)
@@ -539,4 +652,6 @@ train(in_channels=20,
       num_epochs=400,
       weight_decay=1e-4,
       batch_size=10,
-      initial_lr=1e-4)
+      initial_lr=1e-4,
+      loss_tpe='L2'
+    )
