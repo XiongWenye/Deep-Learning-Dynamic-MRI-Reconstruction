@@ -501,173 +501,190 @@ def train(in_channels,
           weight_decay,
           batch_size,
           initial_lr,
-          loss_tpe
-          ):
-    inputs, labels,mask = process_data()
-    model = UNet(in_channels= in_channels, out_channels = out_channels, init_features = init_features)
-    model2 = UNet(in_channels= in_channels, out_channels = out_channels, init_features = init_features)
-    model3=resnet18(n_input_channels=20)
-
+          loss_tpe):
+    # Setup directories for saving results
     parser = argparse.ArgumentParser(description='Save images to specified folder structure.')
     parser.add_argument('folder_name', type=str, help='Name of the folder to save images.')
     args = parser.parse_args()
     
+    # Create directory structure
     base_dir = os.path.join('images', args.folder_name)
     sub_dirs = ['under_sampling', 'full_sampling', 'reconstruction']
-
     for sub_dir in sub_dirs:
         os.makedirs(os.path.join(base_dir, sub_dir), exist_ok=True)
-
     
-    inputs = inputs.to('cuda')
-    labels = labels.to('cuda')
-    model = model.to('cuda')
-    model2 = model2.to('cuda')
-    model3 = model3.to('cuda')
+    # Create output directory for logging
+    output_dir = "output"
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, "output.txt")
+    
+    # Load and prepare data
+    inputs, labels, mask = process_data()
+    
+    # Initialize models
+    model = UNet(in_channels=in_channels, out_channels=out_channels, init_features=init_features)
+    model2 = UNet(in_channels=in_channels, out_channels=out_channels, init_features=init_features)
+    model3 = resnet18(n_input_channels=20)
+    
+    # Move data and models to GPU
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    inputs = inputs.to(device)
+    labels = labels.to(device)
+    model = model.to(device)
+    model2 = model2.to(device)
+    model3 = model3.to(device)
 
+    # Setup tensorboard writer
     writer = SummaryWriter()
 
-    if loss_tpe == 'L2':
-        criterion = nn.MSELoss()
-    elif loss_tpe == 'L1':
-        criterion = nn.L1Loss()
+    # Define loss function
+    criterion = nn.MSELoss() if loss_tpe == 'L2' else nn.L1Loss()
     
+    # Setup optimizer
     param_list = list(model.parameters()) + list(model2.parameters()) + list(model3.parameters())
     optimizer = optim.Adam(param_list, lr=initial_lr, weight_decay=weight_decay)
 
+    # Prepare dataset splits
     dataset = TensorDataset(inputs, labels)
-
-    train_size = 114
-    val_size = 29
-    test_size = 57
-    
-    warmup_epochs = 0.05*num_epochs
-    warmup_lr = 1e-3*initial_lr
-
+    train_size, val_size, test_size = 114, 29, 57
     train_set, val_set, test_set = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])
+    
+    # Create data loaders
     dataloader_train = DataLoader(train_set, batch_size=batch_size, shuffle=True)
     dataloader_val = DataLoader(val_set, batch_size=batch_size, shuffle=True)
-    dataloader_test =  DataLoader(test_set, batch_size=batch_size, shuffle=True)
+    dataloader_test = DataLoader(test_set, batch_size=batch_size, shuffle=True)
 
+    # Learning rate scheduling parameters
+    warmup_epochs = int(0.05 * num_epochs)
+    warmup_lr = 1e-3 * initial_lr
 
+    # Training loop
     for epoch in range(num_epochs):
+        # Learning rate scheduling
         lr = lr_scheduler(epoch, warmup_epochs, warmup_lr, initial_lr, num_epochs)
         for param_group in optimizer.param_groups:
             param_group['lr'] = lr
         
-        train_loss = 0
-        for x, y in dataloader_train:
-            model.train()
-            model2.train()
-            model3.train()
+        # Training phase
+        train_loss = train_epoch(model, model2, model3, dataloader_train, optimizer, criterion)
         
-            outputs1 = model(x[:, :, 0])
-            outputs2 = model2(x[:, :, 1])
-
-            tmp = torch.stack((outputs1, outputs2), dim=2)
-
-            outputs = model3(lab.pseudo2real(tmp).unsqueeze(2))
-            
-            outputs=outputs.squeeze(2)
-            
-            loss = criterion(outputs, y)
-            train_loss += loss.item()
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            
-        train_loss /= len(dataloader_train)
+        # Validation phase
+        val_loss = evaluate(model, model2, model3, dataloader_val, criterion)
         
-        model.eval()
-        model2.eval()
-        model3.eval()
-        
-        val_loss = 0
-        with torch.no_grad():
-            for x, y in dataloader_val:
-                outputs1 = model(x[:, :, 0])
-                outputs2 = model2(x[:, :, 1])
-
-            tmp = torch.stack((outputs1, outputs2), dim=2)
-
-            outputs = model3(lab.pseudo2real(tmp).unsqueeze(2))
-            
-            outputs=outputs.squeeze(2)
-                
-            val_loss += criterion(outputs, y).item()
-        val_loss /= len(dataloader_val)
-        
+        # Log metrics
         writer.add_scalar('Loss/train', train_loss, epoch)
         writer.add_scalar('Loss/val', val_loss, epoch)
-        print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}')
+        log_message = f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}'
+        print(log_message)
+        
+        # Save log to file
+        with open(output_path, "a") as file:
+            file.write(log_message + "\n")
 
+    # Testing phase
+    test_results = test_models(model, model2, model3, dataloader_test, criterion, base_dir)
+    
+    # Log test results
+    log_test_results(test_results, output_path)
+    
+    # Save models
+    save_model(model, "saved_model")
+    
+    writer.close()
+
+def train_epoch(model, model2, model3, dataloader, optimizer, criterion):
+    """Run one training epoch"""
+    model.train()
+    model2.train()
+    model3.train()
+    
+    total_loss = 0
+    for x, y in dataloader:
+        # Forward pass through the models
+        outputs1 = model(x[:, :, 0])
+        outputs2 = model2(x[:, :, 1])
+        tmp = torch.stack((outputs1, outputs2), dim=2)
+        outputs = model3(lab.pseudo2real(tmp).unsqueeze(2)).squeeze(2)
+        
+        # Calculate loss and backpropagate
+        loss = criterion(outputs, y)
+        total_loss += loss.item()
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+    return total_loss / len(dataloader)
+
+def evaluate(model, model2, model3, dataloader, criterion):
+    """Evaluate models on validation or test data"""
     model.eval()
     model2.eval()
     model3.eval()
-    a = []
-    b = []
-    c = []
-    index=0
+    
+    total_loss = 0
     with torch.no_grad():
-        for x, y in dataloader_test:
-            
+        for x, y in dataloader:
             outputs1 = model(x[:, :, 0])
             outputs2 = model2(x[:, :, 1])
-
             tmp = torch.stack((outputs1, outputs2), dim=2)
+            outputs = model3(lab.pseudo2real(tmp).unsqueeze(2)).squeeze(2)
+            total_loss += criterion(outputs, y).item()
+            
+    return total_loss / len(dataloader)
 
-            outputs = model3(lab.pseudo2real(tmp).unsqueeze(2))
-            
-            outputs=outputs.squeeze(2)
-            
-            under_sampling_filename = os.path.join(base_dir, 'under_sampling', f'under_sampling_{index}.png')
-            full_sampling_filename = os.path.join(base_dir, 'full_sampling', f'full_sampling_{index}.png')
-            reconstruction_filename = os.path.join(base_dir, 'reconstruction', f'reconstruction_{index}.png')
-            
-            imsshow(x[0, :, 2].to('cpu').numpy(), num_col=5, cmap='gray', flag="under_sampling", is_colorbar=True,  save_path=under_sampling_filename)
-            imsshow(y[0].to('cpu').numpy(), num_col=5, cmap='gray', flag="full_sampling", is_colorbar=True, save_path=full_sampling_filename)
-            imsshow(outputs[0].to('cpu').numpy(), num_col=5, cmap='gray', flag="reconstruction", is_colorbar=True,  save_path=reconstruction_filename)
-            for i in range(x.size(0)):
-                a.append( criterion(outputs[i], y[i]).item() )
-                b.append(compute_psnr(outputs[i].to('cpu').numpy(), y[i].to('cpu').numpy()))
-                c.append(compute_ssim(outputs[i].to('cpu').numpy(), y[i].to('cpu').numpy()))
-            index+=1
-        
-        a = torch.Tensor(a)
-        b = torch.Tensor(b)
-        c = torch.Tensor(c)
-        a_mean = torch.mean(a)
-        a_std = torch.std(a, dim = 0)
-        b_mean = torch.mean(b)
-        b_std = torch.std(b, dim = 0)
-        c_mean = torch.mean(c)
-        c_std = torch.std(c, dim = 0)
-        
-        print(f'loss: mean = {a_mean}, std = {a_std}')
-        print(f'PSNR: mean = {b_mean}, std = {b_std}')
-        print(f'SSIM: mean = {c_mean}, std = {c_std}')
-    writer.close()
-    filename = f'./saved_model'
-    i = 1
-    while os.path.exists(filename):
-        filename = f'./saved_model_{i}'
-        i += 1
-    torch.save(model.state_dict(), filename)
+def test_models(model, model2, model3, dataloader, criterion, base_dir):
+    """Test models and save visualization results"""
+    model.eval()
+    model2.eval()
+    model3.eval()
     
-    output_dir = "output"
-    output_file = "output.txt"
-    output_path = os.path.join(output_dir, output_file)
+    losses, psnrs, ssims = [], [], []
+    with torch.no_grad():
+        for idx, (x, y) in enumerate(dataloader):
+            # Generate outputs
+            outputs1 = model(x[:, :, 0])
+            outputs2 = model2(x[:, :, 1])
+            tmp = torch.stack((outputs1, outputs2), dim=2)
+            outputs = model3(lab.pseudo2real(tmp).unsqueeze(2)).squeeze(2)
+            
+            # Save sample visualizations
+            save_visualizations(x, y, outputs, idx, base_dir)
+            
+            # Calculate metrics
+            for i in range(x.size(0)):
+                losses.append(criterion(outputs[i], y[i]).item())
+                psnrs.append(compute_psnr(outputs[i].cpu().numpy(), y[i].cpu().numpy()))
+                ssims.append(compute_ssim(outputs[i].cpu().numpy(), y[i].cpu().numpy()))
+    
+    # Calculate statistics
+    metrics = {
+        'loss': {'mean': torch.mean(torch.tensor(losses)), 'std': torch.std(torch.tensor(losses))},
+        'psnr': {'mean': torch.mean(torch.tensor(psnrs)), 'std': torch.std(torch.tensor(psnrs))},
+        'ssim': {'mean': torch.mean(torch.tensor(ssims)), 'std': torch.std(torch.tensor(ssims))}
+    }
+    
+    return metrics
 
-    os.makedirs(output_dir, exist_ok=True)
+def save_visualizations(x, y, outputs, idx, base_dir):
+    """Save visualization images"""
+    under_sampling_filename = os.path.join(base_dir, 'under_sampling', f'under_sampling_{idx}.png')
+    full_sampling_filename = os.path.join(base_dir, 'full_sampling', f'full_sampling_{idx}.png')
+    reconstruction_filename = os.path.join(base_dir, 'reconstruction', f'reconstruction_{idx}.png')
+    
+    imsshow(x[0, :, 2].cpu().numpy(), num_col=5, cmap='gray', flag="under_sampling", 
+            is_colorbar=True, save_path=under_sampling_filename)
+    imsshow(y[0].cpu().numpy(), num_col=5, cmap='gray', flag="full_sampling", 
+            is_colorbar=True, save_path=full_sampling_filename)
+    imsshow(outputs[0].cpu().numpy(), num_col=5, cmap='gray', flag="reconstruction", 
+            is_colorbar=True, save_path=reconstruction_filename)
 
+def log_test_results(results, output_path):
+    """Log test results to file"""
     with open(output_path, "a") as file:
-        epoch_output = f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}'
-        print(epoch_output)
-        file.write(epoch_output + "\n")
-        
-        loss_output = f'loss: mean = {a_mean}, std = {a_std}'
-        psnr_output = f'PSNR: mean = {b_mean}, std = {b_std}'
-        ssim_output = f'SSIM: mean = {c_mean}, std = {c_std}'
+        loss_output = f'Loss: mean = {results["loss"]["mean"]:.4f}, std = {results["loss"]["std"]:.4f}'
+        psnr_output = f'PSNR: mean = {results["psnr"]["mean"]:.4f}, std = {results["psnr"]["std"]:.4f}'
+        ssim_output = f'SSIM: mean = {results["ssim"]["mean"]:.4f}, std = {results["ssim"]["std"]:.4f}'
         
         print(loss_output)
         print(psnr_output)
@@ -676,7 +693,15 @@ def train(in_channels,
         file.write(loss_output + "\n")
         file.write(psnr_output + "\n")
         file.write(ssim_output + "\n")
-    
+
+def save_model(model, base_name):
+    """Save model with unique filename"""
+    filename = f'./{base_name}'
+    i = 1
+    while os.path.exists(filename):
+        filename = f'./{base_name}_{i}'
+        i += 1
+    torch.save(model.state_dict(), filename)
 
 train(in_channels=20,
       out_channels=20,
