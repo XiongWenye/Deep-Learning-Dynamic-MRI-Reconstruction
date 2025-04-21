@@ -437,26 +437,6 @@ def process_data():
     inputs = torch.cat((inputs, inputs2), dim=2)
     
     # Visualize original and undersampled images
-    for i in range(min(3, labels.shape[0])):  # Show first 3 images
-        plt.figure(figsize=(15, 5))
-        
-        plt.subplot(1, 3, 1)
-        plt.imshow(labels[i, 0].numpy(), cmap='gray')
-        plt.title('Fully Sampled Image')
-        plt.colorbar()
-        
-        plt.subplot(1, 3, 2)
-        plt.imshow(inputs[i, 0, 0].numpy(), cmap='gray')
-        plt.title('Undersampled Image (Real)')
-        plt.colorbar()
-        
-        plt.subplot(1, 3, 3)
-        plt.imshow(np.abs(mask[0, 0].numpy()), cmap='gray')
-        plt.title('Sampling Mask')
-        plt.colorbar()
-        
-        plt.savefig(f'comparison_image_{i}.png')
-        plt.close()
     
     return (inputs, labels, mask) 
 
@@ -645,6 +625,32 @@ def train(in_channels,
         file.write(loss_output + "\n")
         file.write(psnr_output + "\n")
         file.write(ssim_output + "\n")
+    
+    for i in range(min(3, labels.shape[0])):  # Show first 3 images
+        plt.figure(figsize=(15, 5))
+        
+        plt.subplot(1, 3, 1)
+        plt.imshow(labels[i, 0].numpy(), cmap='gray')
+        plt.title('Fully Sampled Image')
+        plt.colorbar()
+        
+        plt.subplot(1, 3, 2)
+        plt.imshow(inputs[i, 0, 0].numpy(), cmap='gray')
+        plt.title('Undersampled Image (Real)')
+        plt.colorbar()
+        
+        plt.subplot(1, 3, 3)
+        plt.imshow(np.abs(mask[0, 0].numpy()), cmap='gray')
+        plt.title('Sampling Mask')
+        plt.colorbar()
+
+        plt.subplot(1, 3, 4)
+        plt.imshow(outputs[i, 0].numpy(), cmap='gray')
+        plt.title('Reconstructed Image')
+        plt.colorbar()
+        
+        plt.savefig(f'comparison_image_{i}.png')
+        plt.close()
 
 train(in_channels=20,
       out_channels=20,
