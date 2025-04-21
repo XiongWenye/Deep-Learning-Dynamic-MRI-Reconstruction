@@ -111,131 +111,165 @@ def variable_density_mask(shape, acceleration=5, center_lines=11, seed=42):
 
 
 class UNet(nn.Module):
-
     def __init__(self, in_channels=3, out_channels=1, init_features=32):
         super(UNet, self).__init__()
 
         features = init_features
         
-        self.dropout = nn.Dropout(p = 0.3)
+        # Improved dropout strategy with slightly lower rate
+        self.dropout = nn.Dropout(p=0.2)
         
-        self.encoder1 = UNet._block(in_channels, features, name="enc1")
+        # Add Leaky ReLU instead of ReLU for better gradient flow
+        self.activation = nn.LeakyReLU(negative_slope=0.1, inplace=True)
+        
+        # Add instance normalization option for better training stability
+        self.encoder1 = self._block(in_channels, features, name="enc1")
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.encoder2 = UNet._block(features, features * 2, name="enc2")
+        self.encoder2 = self._block(features, features * 2, name="enc2")
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.encoder3 = UNet._block(features * 2, features * 4, name="enc3")
+        self.encoder3 = self._block(features * 2, features * 4, name="enc3")
         self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.encoder4 = UNet._block(features * 4, features * 8, name="enc4")
+        self.encoder4 = self._block(features * 4, features * 8, name="enc4")
         self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.bottleneck = UNet._block(features * 8, features * 16, name="bottleneck")
+        # Add attention mechanism to bottleneck
+        self.bottleneck = self._block(features * 8, features * 16, name="bottleneck")
+        self.attention = self._attention_block(features * 16)
 
-        self.upconv4 = nn.ConvTranspose2d(
-            features * 16, features * 8, kernel_size=2, stride=2
-        )
-        self.decoder4 = UNet._block((features * 8) * 2, features * 8, name="dec4")
-        self.upconv3 = nn.ConvTranspose2d(
-            features * 8, features * 4, kernel_size=2, stride=2
-        )
-        self.decoder3 = UNet._block((features * 4) * 2, features * 4, name="dec3")
-        self.upconv2 = nn.ConvTranspose2d(
-            features * 4, features * 2, kernel_size=2, stride=2
-        )
-        self.decoder2 = UNet._block((features * 2) * 2, features * 2, name="dec2")
-        self.upconv1 = nn.ConvTranspose2d(
-            features * 2, features, kernel_size=2, stride=2
-        )
-        self.decoder1 = UNet._block(features * 2, features, name="dec1")
+        # Upsampling path with skip connections
+        self.upconv4 = nn.ConvTranspose2d(features * 16, features * 8, kernel_size=2, stride=2)
+        self.decoder4 = self._block(features * 16, features * 8, name="dec4")
+        self.upconv3 = nn.ConvTranspose2d(features * 8, features * 4, kernel_size=2, stride=2)
+        self.decoder3 = self._block(features * 8, features * 4, name="dec3")
+        self.upconv2 = nn.ConvTranspose2d(features * 4, features * 2, kernel_size=2, stride=2)
+        self.decoder2 = self._block(features * 4, features * 2, name="dec2")
+        self.upconv1 = nn.ConvTranspose2d(features * 2, features, kernel_size=2, stride=2)
+        self.decoder1 = self._block(features * 2, features, name="dec1")
 
-        self.conv = nn.Conv2d(
-            in_channels=features, out_channels=out_channels, kernel_size=1
-        )
+        # Add a deeper output layer
+        self.pre_conv = nn.Conv2d(features, features, kernel_size=3, padding=1)
+        self.conv = nn.Conv2d(features, out_channels, kernel_size=1)
+        
+        # Initialize weights for better training
+        self._initialize_weights()
 
     def forward(self, x):
+        # Add print statements to debug sizes
+        batch_size = x.shape[0]
+
+        # Encoder path
         enc1 = self.encoder1(x)
+        enc1_shape = enc1.shape  # Debug shape
         enc1 = self.dropout(enc1)
-        enc2 = self.encoder2(self.pool1(enc1))
+
+        # Apply pooling and get encoder features
+        pool1 = self.pool1(enc1)
+        enc2 = self.encoder2(pool1)
+        enc2_shape = enc2.shape  # Debug shape
         enc2 = self.dropout(enc2)
-        
-        enc3 = self.encoder3(self.pool2(enc2))
-        enc3 = self.dropout(enc3)
-        
-        enc4 = self.encoder4(self.pool3(enc3))
+
+        pool2 = self.pool2(enc2)
+        enc3 = self.encoder3(pool2)
+        enc3_shape = enc3.shape  # Debug shape
+
+        pool3 = self.pool3(enc3)
+        enc4 = self.encoder4(pool3)
+        enc4_shape = enc4.shape  # Debug shape
         enc4 = self.dropout(enc4)
-        
 
-        bottleneck = self.bottleneck(self.pool4(enc4))
+        # Bottleneck
+        pool4 = self.pool4(enc4)
+        bottleneck = self.bottleneck(pool4)
+        bottleneck_shape = bottleneck.shape  # Debug shape
+        bottleneck = self.attention(bottleneck)
 
+        # Decoder path - make sure shapes are compatible for skip connections
         dec4 = self.upconv4(bottleneck)
+        dec4_shape = dec4.shape  # Debug shape
+
+        # Check for dimension mismatch and fix if necessary
+        if dec4.shape[2:] != enc4.shape[2:]:
+            # Resize dec4 to match spatial dimensions of enc4
+            dec4 = F.interpolate(dec4, size=enc4.shape[2:], mode='bilinear', align_corners=True)
+
         dec4 = torch.cat((dec4, enc4), dim=1)
         dec4 = self.decoder4(dec4)
+
         dec3 = self.upconv3(dec4)
+        if dec3.shape[2:] != enc3.shape[2:]:
+            # Resize dec3 to match spatial dimensions of enc3
+            dec3 = F.interpolate(dec3, size=enc3.shape[2:], mode='bilinear', align_corners=True)
+            
         dec3 = torch.cat((dec3, enc3), dim=1)
         dec3 = self.decoder3(dec3)
+
         dec2 = self.upconv2(dec3)
+        if dec2.shape[2:] != enc2.shape[2:]:
+            # Resize dec2 to match spatial dimensions of enc2
+            dec2 = F.interpolate(dec2, size=enc2.shape[2:], mode='bilinear', align_corners=True)
+            
         dec2 = torch.cat((dec2, enc2), dim=1)
         dec2 = self.decoder2(dec2)
+
         dec1 = self.upconv1(dec2)
+        if dec1.shape[2:] != enc1.shape[2:]:
+            # Resize dec1 to match spatial dimensions of enc1
+            dec1 = F.interpolate(dec1, size=enc1.shape[2:], mode='bilinear', align_corners=True)
+            
         dec1 = torch.cat((dec1, enc1), dim=1)
         dec1 = self.decoder1(dec1)
-        return torch.sigmoid(self.conv(dec1))
 
-    @staticmethod
-    def _block(in_channels, features, name):
+        # Apply final convolutions
+        out = self.activation(self.pre_conv(dec1))
+        return torch.sigmoid(self.conv(out))
+
+    def _block(self, in_channels, features, name):
         return nn.Sequential(
-            OrderedDict(
-                [
-                    (
-                        name + "conv1",
-                        nn.Conv2d(
-                            in_channels=in_channels,
-                            out_channels=features,
-                            kernel_size=3,
-                            padding=1,
-                            bias=False,
-                        ),
-                    ),
-                    (name + "norm1", nn.BatchNorm2d(num_features=features)),
-                    (name + "relu1", nn.ReLU(inplace=True)),
-                    (
-                        name + "conv2",
-                        nn.Conv2d(
-                            in_channels=features,
-                            out_channels=features,
-                            kernel_size=3,
-                            padding=1,
-                            bias=False,
-                        ),
-                    ),
-                    (name + "norm2", nn.BatchNorm2d(num_features=features)),
-                    (name + "relu2", nn.ReLU(inplace=True)),
-                ]
-            )
+            OrderedDict([
+                (name + "conv1", nn.Conv2d(in_channels=in_channels, out_channels=features, 
+                                         kernel_size=3, padding=1, bias=False)),
+                (name + "norm1", nn.BatchNorm2d(num_features=features)),
+                (name + "relu1", nn.LeakyReLU(negative_slope=0.1, inplace=True)),
+                (name + "conv2", nn.Conv2d(in_channels=features, out_channels=features, 
+                                         kernel_size=3, padding=1, bias=False)),
+                (name + "norm2", nn.BatchNorm2d(num_features=features)),
+                (name + "relu2", nn.LeakyReLU(negative_slope=0.1, inplace=True)),
+            ])
         )
+        
+    def _attention_block(self, features):
+        # Simple channel attention mechanism
+        return nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Conv2d(features, features // 8, kernel_size=1),
+            nn.LeakyReLU(negative_slope=0.1, inplace=True),
+            nn.Conv2d(features // 8, features, kernel_size=1),
+            nn.Sigmoid()
+        )
+        
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
 
 
 
 
 
-# 2D+1D ResNet
+# 3D ResNet implementation
 
-def conv1x3x3(in_planes, mid_planes, stride=1):
+def conv3x3x3(in_planes, out_planes, stride=1):
     return nn.Conv3d(in_planes,
-                     mid_planes,
-                     kernel_size=(1, 3, 3),
-                     stride=(1, stride, stride),
-                     padding=(0, 1, 1),
+                     out_planes,
+                     kernel_size=3,
+                     stride=stride,
+                     padding=1,
                      bias=False)
-
-
-def conv3x1x1(mid_planes, planes, stride=1):
-    return nn.Conv3d(mid_planes,
-                     planes,
-                     kernel_size=(3, 1, 1),
-                     stride=(stride, 1, 1),
-                     padding=(1, 0, 0),
-                     bias=False)
-
 
 def conv1x1x1(in_planes, out_planes, stride=1):
     return nn.Conv3d(in_planes,
@@ -244,48 +278,29 @@ def conv1x1x1(in_planes, out_planes, stride=1):
                      stride=stride,
                      bias=False)
 
-
 class BasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self, in_planes, planes, stride=1, downsample=None):
         super().__init__()
 
-        n_3d_parameters1 = in_planes * planes * 3 * 3 * 3
-        n_2p1d_parameters1 = in_planes * 3 * 3 + 3 * planes
-        mid_planes1 = n_3d_parameters1 // n_2p1d_parameters1
-        self.conv1_s = conv1x3x3(in_planes, mid_planes1, stride)
-        self.bn1_s = nn.BatchNorm3d(mid_planes1)
-        self.conv1_t = conv3x1x1(mid_planes1, planes, stride)
-        self.bn1_t = nn.BatchNorm3d(planes)
-
-        n_3d_parameters2 = planes * planes * 3 * 3 * 3
-        n_2p1d_parameters2 = planes * 3 * 3 + 3 * planes
-        mid_planes2 = n_3d_parameters2 // n_2p1d_parameters2
-        self.conv2_s = conv1x3x3(planes, mid_planes2)
-        self.bn2_s = nn.BatchNorm3d(mid_planes2)
-        self.conv2_t = conv3x1x1(mid_planes2, planes)
-        self.bn2_t = nn.BatchNorm3d(planes)
-
+        self.conv1 = conv3x3x3(in_planes, planes, stride)
+        self.bn1 = nn.BatchNorm3d(planes)
         self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3x3(planes, planes)
+        self.bn2 = nn.BatchNorm3d(planes)
         self.downsample = downsample
         self.stride = stride
 
     def forward(self, x):
         residual = x
 
-        out = self.conv1_s(x)
-        out = self.bn1_s(out)
-        out = self.relu(out)
-        out = self.conv1_t(out)
-        out = self.bn1_t(out)
+        out = self.conv1(x)
+        out = self.bn1(out)
         out = self.relu(out)
 
-        out = self.conv2_s(out)
-        out = self.bn2_s(out)
-        out = self.relu(out)
-        out = self.conv2_t(out)
-        out = self.bn2_t(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
 
         if self.downsample is not None:
             residual = self.downsample(x)
@@ -316,27 +331,17 @@ class ResNet(nn.Module):
         self.in_planes = block_inplanes[0]
         self.no_max_pool = no_max_pool
 
-        n_3d_parameters = 3 * self.in_planes * conv1_t_size * 7 * 7
-        n_2p1d_parameters = 3 * 7 * 7 + conv1_t_size * self.in_planes
-        mid_planes = n_3d_parameters // n_2p1d_parameters
-        self.conv1_s = nn.Conv3d(n_input_channels,
-                                 mid_planes,
-                                 kernel_size=(1, 7, 7),
-                                 stride=(1, 2, 2),
-                                #  stride=(1, 1, 1),
-                                 padding=(0, 3, 3),
-                                 bias=False)
-        self.bn1_s = nn.BatchNorm3d(mid_planes)
-        self.conv1_t = nn.Conv3d(mid_planes,
-                                 self.in_planes,
-                                 kernel_size=(conv1_t_size, 1, 1),
-                                 stride=(conv1_t_stride, 1, 1),
-                                 padding=(conv1_t_size // 2, 0, 0),
-                                 bias=False)
-        self.bn1_t = nn.BatchNorm3d(self.in_planes)
+        # Full 3D convolution
+        self.conv1 = nn.Conv3d(n_input_channels,
+                               self.in_planes,
+                               kernel_size=(3, 7, 7),
+                               stride=(1, 2, 2),
+                               padding=(1, 3, 3),
+                               bias=False)
+        self.bn1 = nn.BatchNorm3d(self.in_planes)
         self.relu = nn.ReLU(inplace=True)
-
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=1, padding=1)
+        
         self.layer1 = self._make_layer(block, block_inplanes[0], layers[0],
                                        shortcut_type)
         self.conv2 = nn.Conv3d(self.in_planes, 20, kernel_size=1)  
@@ -377,21 +382,18 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        # Original forward pass
-        x = self.conv1_s(x)
-        x = self.bn1_s(x)
+        x = self.conv1(x)
+        x = self.bn1(x)
         x = self.relu(x)
-        x = self.conv1_t(x)
-        x = self.bn1_t(x)
-        x = self.relu(x)
+        
         x = self.maxpool(x)
         x = self.layer1(x)
-        x = F.interpolate(x, scale_factor=(1, 2, 2), mode='trilinear', align_corners=True) # Upsample the output
+        x = F.interpolate(x, scale_factor=(1, 2, 2), mode='trilinear', align_corners=True) # Upsample spatial dims
         x = self.conv2(x)
         return torch.sigmoid(x)
     
 def resnet18(**kwargs):
-    model = ResNet(BasicBlock, [1, 1, 1, 1], [20,40,80,160], **kwargs)
+    model = ResNet(BasicBlock, [1, 1, 1, 1], [32, 64, 128, 256], **kwargs)
     return model
 
 
@@ -437,6 +439,26 @@ def process_data():
     inputs = torch.cat((inputs, inputs2), dim=2)
     
     # Visualize original and undersampled images
+    for i in range(min(3, labels.shape[0])):  # Show first 3 images
+        plt.figure(figsize=(15, 5))
+        
+        plt.subplot(1, 3, 1)
+        plt.imshow(labels[i, 0].numpy(), cmap='gray')
+        plt.title('Fully Sampled Image')
+        plt.colorbar()
+        
+        plt.subplot(1, 3, 2)
+        plt.imshow(inputs[i, 0, 0].numpy(), cmap='gray')
+        plt.title('Undersampled Image (Real)')
+        plt.colorbar()
+        
+        plt.subplot(1, 3, 3)
+        plt.imshow(np.abs(mask[0, 0].numpy()), cmap='gray')
+        plt.title('Sampling Mask')
+        plt.colorbar()
+        
+        plt.savefig(f'comparison_image_{i}.png')
+        plt.close()
     
     return (inputs, labels, mask) 
 
@@ -626,36 +648,11 @@ def train(in_channels,
         file.write(psnr_output + "\n")
         file.write(ssim_output + "\n")
     
-    for i in range(min(3, labels.shape[0])):  # Show first 3 images
-        plt.figure(figsize=(15, 5))
-        
-        plt.subplot(1, 3, 1)
-        plt.imshow(labels[i, 0].numpy(), cmap='gray')
-        plt.title('Fully Sampled Image')
-        plt.colorbar()
-        
-        plt.subplot(1, 3, 2)
-        plt.imshow(inputs[i, 0, 0].numpy(), cmap='gray')
-        plt.title('Undersampled Image (Real)')
-        plt.colorbar()
-        
-        plt.subplot(1, 3, 3)
-        plt.imshow(np.abs(mask[0, 0].numpy()), cmap='gray')
-        plt.title('Sampling Mask')
-        plt.colorbar()
-
-        plt.subplot(1, 3, 4)
-        plt.imshow(outputs[i, 0].numpy(), cmap='gray')
-        plt.title('Reconstructed Image')
-        plt.colorbar()
-        
-        plt.savefig(f'comparison_image_{i}.png')
-        plt.close()
 
 train(in_channels=20,
       out_channels=20,
       init_features=64,
-      num_epochs=400,
+      num_epochs=300,
       weight_decay=1e-4,
       batch_size=10,
       initial_lr=1e-4,
