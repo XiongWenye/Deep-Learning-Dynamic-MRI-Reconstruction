@@ -682,9 +682,9 @@ def save_visualizations(x, y, outputs, idx, base_dir):
 def log_test_results(results, output_path):
     """Log test results to file"""
     with open(output_path, "a") as file:
-        loss_output = f'Loss: mean = {results["loss"]["mean"]:.4f}, std = {results["loss"]["std"]:.4f}'
-        psnr_output = f'PSNR: mean = {results["psnr"]["mean"]:.4f}, std = {results["psnr"]["std"]:.4f}'
-        ssim_output = f'SSIM: mean = {results["ssim"]["mean"]:.4f}, std = {results["ssim"]["std"]:.4f}'
+        loss_output = f'Loss: mean = {results["loss"]["mean"]:.8f}, std = {results["loss"]["std"]:.8f}'
+        psnr_output = f'PSNR: mean = {results["psnr"]["mean"]:.8f}, std = {results["psnr"]["std"]:.8f}'
+        ssim_output = f'SSIM: mean = {results["ssim"]["mean"]:.8f}, std = {results["ssim"]["std"]:.8f}'
         
         print(loss_output)
         print(psnr_output)
@@ -706,7 +706,7 @@ def save_model(model, base_name):
 train(in_channels=20,
       out_channels=20,
       init_features=64,
-      num_epochs=500,
+      num_epochs=800,
       weight_decay=1e-4,
       batch_size=10,
       initial_lr=1e-4,
