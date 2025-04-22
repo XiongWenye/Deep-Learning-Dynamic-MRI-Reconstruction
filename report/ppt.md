@@ -127,7 +127,6 @@ outputs = model3(lab.pseudo2real(tmp).unsqueeze(2)).squeeze(2) # ResNet processi
     ```python
     lr = lr_scheduler(epoch, warmup_epochs, warmup_lr, initial_lr, num_epochs)
     ```
-*   **Device:** Uses CUDA (GPU) if available.
 *   **Logging:** TensorBoard for tracking loss curves. Output logs saved to `output/output.txt`.
 
 ---
