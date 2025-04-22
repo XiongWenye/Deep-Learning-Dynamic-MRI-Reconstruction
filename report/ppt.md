@@ -13,7 +13,7 @@ paginate: true
 ## Introduction: MRI Undersampling
 
 *   **Goal:** Accelerate MRI acquisition by acquiring fewer k-space samples.
-*   **Challenge:** Undersampling leads to aliasing artifacts in the reconstructed image.
+*   **Challenge:** Undersampling leads to aliasing artifacts.
 *   **Solution:** Use deep learning to reconstruct high-quality images from undersampled data.
 
 ---
@@ -26,7 +26,7 @@ paginate: true
     *   Preserves central k-space lines.
     *   Random sampling in outer regions.
 3.  **Apply Mask:** Multiply the k-space representation of the fully sampled data by the mask.
-4.  **Convert to Image Space:** Apply inverse Fourier Transform (iFFT) to get the undersampled, aliased images.
+4.  **Convert to Image Space:** Apply iFFT to get the undersampled, aliased images.
 5.  **Format Data:** Convert complex images to pseudo-real format for model input.
 
 ---
@@ -62,7 +62,6 @@ def variable_density_mask(shape, acceleration=5, center_lines=11, seed=42):
     *   Dropout for regularization.
     *   Batch Normalization.
     *   Attention mechanism in the bottleneck.
-    *   Kaiming weight initialization.
 
 ---
 
