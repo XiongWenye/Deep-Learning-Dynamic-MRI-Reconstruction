@@ -480,7 +480,7 @@ def process_data():
         plt.title("Sampling Mask")
         plt.colorbar()
 
-        plt.savefig(f"comparison_image_{i}.png")
+        plt.savefig(f"assets/comparison_image_{i}.png")
         plt.close()
 
     return (inputs, labels, mask)
