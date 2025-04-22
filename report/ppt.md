@@ -31,24 +31,6 @@ paginate: true
 
 ---
 
-## Variable Density Mask Generation
-
-```python
-def variable_density_mask(shape, acceleration=5, center_lines=11, seed=42):
-    # ... (Implementation details) ...
-    # Ensures central lines are sampled
-    # Samples outer lines with decreasing probability
-    # ...
-    return mask
-```
-
-*   Generates a mask to simulate undersampling.
-*   `acceleration`: Controls the degree of undersampling.
-*   `center_lines`: Number of fully sampled central lines.
-*   Visualized mask shows sampling pattern in k-space and over time
-
----
-
 ![Undersampling Mask](../assets/undersampling_mask.png)
 
 ---
