@@ -1,3 +1,4 @@
+import wandb
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -23,11 +24,13 @@ from torch.utils.data import TensorDataset, DataLoader
 import torch
 import math
 from functools import partial
+import os
+os.environ["WANDB_SYMLINK"] = "off"
 
 from bme1312.utils  import lr_scheduler,compute_psnr, compute_ssim
 
 def variable_density_mask(shape, acceleration=5, center_lines=11, seed=42):
-    """
+    """e
     Generate a variable density random undersampling pattern
     
     Args:
@@ -456,7 +459,6 @@ def imsshow(imgs, flag, titles=None, num_col=5, dpi=100, cmap=None, is_colorbar=
 def process_data():
     dataset = np.load('./cine.npz')['dataset']
     labels = torch.Tensor(dataset)
-    
     # Create variable density mask with acceleration factor 5
     mask = variable_density_mask(shape=(1, 20, 192, 192), acceleration=5, center_lines=11)
     mask = torch.Tensor(mask)
@@ -469,7 +471,7 @@ def process_data():
     
     inputs2 = lab.pseudo2real(inputs).unsqueeze(2)
     inputs = torch.cat((inputs, inputs2), dim=2)
-    
+
     # Visualize original and undersampled images
     for i in range(min(3, labels.shape[0])):  # Show first 3 images
         plt.figure(figsize=(15, 5))
@@ -492,7 +494,7 @@ def process_data():
         plt.savefig(f'comparison_image_{i}.png')
         plt.close()
     
-    return (inputs, labels, mask) 
+    return (inputs, labels, mask.repeat(200, 1, 1, 1)) 
 
 def train(in_channels, 
           out_channels,
@@ -576,11 +578,19 @@ def train(in_channels,
         writer.add_scalar('Loss/val', val_loss, epoch)
         log_message = f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}'
         print(log_message)
+        # Add wandb logging
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            "learning_rate": lr
+        })
         
         # Save log to file
         with open(output_path, "a") as file:
             file.write(log_message + "\n")
-
+    
+    wandb.finish()
     # Testing phase
     test_results = test_models(model, model2, model3, dataloader_test, criterion, base_dir)
     
@@ -703,12 +713,284 @@ def save_model(model, base_name):
         i += 1
     torch.save(model.state_dict(), filename)
 
-train(in_channels=20,
-      out_channels=20,
-      init_features=64,
-      num_epochs=800,
-      weight_decay=1e-4,
-      batch_size=10,
-      initial_lr=1e-4,
-      loss_tpe='L2'
+class DataConsistencyLayer(nn.Module):
+    """
+    Data Consistency (DC) layer with a balancing parameter λ.
+    """
+    def __init__(self, lam=1.0, trainable=True):
+        """
+        Args:
+            lam: Weight (lam) controlling the contribution of the network output and acquired k-space data.
+            trainable: Whether lam should be a trainable parameter.
+        """
+        super(DataConsistencyLayer, self).__init__()
+        if trainable:
+            self.lam = nn.Parameter(torch.tensor(lam, dtype=torch.float32))
+        else:
+            self.lam = lam
+
+    def forward(self, x, kspace_input, mask):
+        """
+        Args:
+            x: Reconstructed k-space data (complex, shape [batch, frames, height, width, 2]).
+            kspace_input: Original acquired k-space data (complex, shape [batch, frames, height, width, 2]).
+            mask: Sampling mask (binary, shape [batch, frames, height, width]).
+        
+        Returns:
+            x_dc: K-space data after enforcing data consistency.
+        """
+        # DC at sampled locations
+        # print(mask.shape, x.shape)
+        dc_sampled = (x + self.lam * kspace_input) / (1 + self.lam)
+        dc_sampled = lab.image2kspace(lab.pseudo2complex(dc_sampled[:,:,:2]))
+        # Combine with unsampled locations
+        x_dc = mask * dc_sampled + (1 - mask) * lab.pseudo2complex(x[:,:,:2])
+        x_dc = lab.complex2pseudo(x_dc)
+        x_dc_amplitude = lab.pseudo2real(x_dc).unsqueeze(2)
+        return torch.cat((x_dc, x_dc_amplitude), dim=2)
+    
+class UnrolledNetwork(nn.Module):
+    """
+    Unrolled network cascading two UNet models, ResNet18, and a Data Consistency (DC) layer.
+    """
+    def __init__(self, num_cascades, in_channels, out_channels, init_features):
+        """
+        Args:
+            num_cascades: Number of cascades (repeated UNet + UNet + ResNet18 + DC blocks).
+            in_channels: Number of input channels to the UNet models.
+            out_channels: Number of output channels from the UNet models.
+            init_features: Initial feature size for the UNet models.
+        """
+        super(UnrolledNetwork, self).__init__()
+        self.num_cascades = num_cascades
+        
+        # Create cascades of two UNets, ResNet18, and DC layers
+        self.unet1_blocks = nn.ModuleList([UNet(in_channels, out_channels, init_features) for _ in range(num_cascades)])
+        self.unet2_blocks = nn.ModuleList([UNet(in_channels, out_channels, init_features) for _ in range(num_cascades)])
+        self.resnet_blocks = nn.ModuleList([resnet18(n_input_channels=out_channels) for _ in range(num_cascades)])
+        self.dc_layers = nn.ModuleList([DataConsistencyLayer() for _ in range(num_cascades)])
+
+    def forward(self, x, kspace_input, mask):
+        """
+        Forward pass through the unrolled network.
+        
+        Args:
+            x: Initial reconstructed k-space data (complex, shape [batch, frames, 2, height, width]).
+            kspace_input: Original acquired k-space data (complex, shape [batch, frames, 2, height, width]).
+            mask: Sampling mask (binary, shape [batch, frames, height, width]).
+        
+        Returns:
+            x: Final reconstructed k-space data.
+        """
+        # print("before loop:", x.shape, kspace_input.shape)
+        for unet1, unet2, resnet, dc_layer in zip(self.unet1_blocks, self.unet2_blocks, self.resnet_blocks, self.dc_layers):
+            # Pass through UNet1
+            # print(x[:, :, 0].shape)
+            out1 = unet1(x[:, :, 0])
+            
+            # Pass through UNet2
+            out2 = unet2(x[:, :, 1])
+            
+            # Stack outputs and pass through ResNet18
+            stacked_output = torch.stack((out1, out2), dim=2)
+            resnet_input = lab.pseudo2real(stacked_output).unsqueeze(2)
+            x_resnet = resnet(resnet_input).squeeze(2)
+            
+            # Convert back to pseudo-complex format
+            x = lab.real2UnetInput(x_resnet)
+            
+            # Enforce data consistency
+            x = dc_layer(x, kspace_input, mask)
+        
+        return x[:,:,2] # the amplitude slice of the output
+    
+def train_unrolled_network(num_cascades, 
+                                          in_channels, 
+                                          out_channels, 
+                                          init_features, 
+                                          num_epochs, 
+                                          weight_decay, 
+                                          batch_size, 
+                                          initial_lr, 
+                                          loss_tpe):
+    """
+    Training function for the unrolled network (two UNets + ResNet18 + DC).
+    """
+    # Initialize wandb for tracking
+    wandb.init(
+        project="unrolled_network_training",  # Replace with your project name
+        # entity="your_entity_name",           # Replace with your wandb username or team name
+        config={
+            "num_cascades": num_cascades,
+            "in_channels": in_channels,
+            "out_channels": out_channels,
+            "init_features": init_features,
+            "num_epochs": num_epochs,
+            "weight_decay": weight_decay,
+            "batch_size": batch_size,
+            "initial_lr": initial_lr,
+            "loss_type": loss_tpe
+        }
+    )
+
+    # Load dataset
+    inputs, labels, mask = process_data()
+    
+    # Setup directories for saving results
+    parser = argparse.ArgumentParser(description='Save images to specified folder structure.')
+    parser.add_argument('folder_name', type=str, help='Name of the folder to save images.')
+    args = parser.parse_args()
+
+    # Create directory structure
+    base_dir = os.path.join('images', args.folder_name)
+    sub_dirs = ['under_sampling', 'full_sampling', 'reconstruction']
+    for sub_dir in sub_dirs:
+        os.makedirs(os.path.join(base_dir, sub_dir), exist_ok=True)
+    
+    # Create output directory for logging
+    output_dir = "output"
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, "output.txt")
+
+    # Initialize unrolled model
+    model = UnrolledNetwork(num_cascades, in_channels, out_channels, init_features)
+    
+    # Move data and model to GPU
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    inputs, labels, mask = inputs.to(device), labels.to(device), mask.to(device)
+    model = model.to(device)
+
+    # Define loss function
+    criterion = nn.MSELoss() if loss_tpe == 'L2' else nn.L1Loss()
+
+    # Define optimizer
+    optimizer = optim.Adam(model.parameters(), lr=initial_lr, weight_decay=weight_decay)
+
+    # Prepare dataset splits
+    # print(inputs.shape, labels.shape, mask.shape)
+    dataset = TensorDataset(inputs, labels, mask)
+    train_size, val_size, test_size = 114, 29, 57
+    train_set, val_set, test_set = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])
+
+    # Create data loaders
+    dataloader_train = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    dataloader_val = DataLoader(val_set, batch_size=batch_size, shuffle=False)
+    dataloader_test = DataLoader(test_set, batch_size=batch_size, shuffle=True)
+    
+    # Learning rate scheduling parameters
+    warmup_epochs = int(0.05 * num_epochs)
+    warmup_lr = 1e-3 * initial_lr
+    
+    # Setup tensorboard writer
+    writer = SummaryWriter()
+
+    # Training loop
+    for epoch in range(num_epochs):
+        print(f"running epoch {epoch}")
+        lr = lr_scheduler(epoch, warmup_epochs, warmup_lr, initial_lr, num_epochs)
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = lr
+
+        # decided it would be too strange to separate it to a separate function
+        # traning phase
+        model.train()
+        total_train_loss = 0
+        print(f"{epoch} compute training loss")
+        for idx, (x, y, m) in enumerate(dataloader_train):
+            # Forward pass
+            print(f"start {idx}")
+            outputs = model(x, x, m)  # x is used as both initial k-space and input
+            loss = criterion(outputs, y)
+            print(f"forward {idx} complete.")
+            # Backward pass
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            print(f"backward {idx} complete.")
+            total_train_loss += loss.item()
+        
+        train_loss = total_train_loss / len(dataloader_train)
+        print(f"{epoch} training loss complete")
+        # Validation phase
+        model.eval()
+        total_val_loss = 0
+        with torch.no_grad():
+            for x, y, m in dataloader_val:
+                outputs = model(x, x, m)
+                val_loss = criterion(outputs, y)
+                total_val_loss += val_loss.item()
+        
+        val_loss = total_val_loss / len(dataloader_val)
+
+        writer.add_scalar('Loss/train', train_loss, epoch)
+        writer.add_scalar('Loss/val', val_loss, epoch)
+        # Log metrics to wandb
+        wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "val_loss": val_loss})
+        log_message = f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}'
+        print(log_message)
+        with open(output_path, "a") as file:
+            file.write(log_message + "\n")
+
+    wandb.finish()
+    test_results = test_unrolled_network(model, dataloader_test, criterion, base_dir)
+    
+    # Log test results
+    log_test_results(test_results, output_path)
+    
+    # Save models
+    save_model(model, "saved_unrolled_model")
+    
+    writer.close()
+    # return model, test_set
+
+def test_unrolled_network(model, dataloader_test, dataloader, criterion, base_dir):
+    """
+    Test the unrolled network and log results.
+    """
+    model.eval()
+    criterion = nn.MSELoss()  # Assuming L2 loss for evaluation
+    total_loss = 0
+
+    psnrs = []
+    ssims = []
+
+    with torch.no_grad():
+        for idx, (x, y, m) in enumerate(dataloader_test):
+            outputs = model(x, x, m)  # x is used as both initial k-space and input
+            loss = criterion(outputs, y)
+            total_loss += loss.item()
+            
+            save_visualizations(x, y, outputs, idx, base_dir)
+            # Calculate PSNR and SSIM for each sample
+            for i in range(x.size(0)):
+                psnrs.append(compute_psnr(outputs[i].cpu().numpy(), y[i].cpu().numpy()))
+                ssims.append(compute_ssim(outputs[i].cpu().numpy(), y[i].cpu().numpy()))
+    
+    test_loss = total_loss / len(dataloader_test)
+    mean_psnr = sum(psnrs) / len(psnrs)
+    mean_ssim = sum(ssims) / len(ssims)
+
+    print(f"Test Loss: {test_loss:.6f}, Mean PSNR: {mean_psnr:.4f}, Mean SSIM: {mean_ssim:.4f}")
+    return test_loss, mean_psnr, mean_ssim
+
+if __name__ == "__main__":
+    # train(in_channels=20,
+    #   out_channels=20,
+    #   init_features=64,
+    #   num_epochs=800,
+    #   weight_decay=1e-4,
+    #   batch_size=10,
+    #   initial_lr=1e-4,
+    #   loss_tpe='L2'
+    # )
+    train_unrolled_network(
+        num_cascades=5,
+        in_channels=20,
+        out_channels=20,
+        init_features=64,
+        num_epochs=800,
+        weight_decay=1e-4,
+        batch_size=10,
+        initial_lr=1e-4,
+        loss_tpe='L2'
     )
