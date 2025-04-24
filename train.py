@@ -942,7 +942,8 @@ def train_unrolled_network(num_cascades,
             "epoch": epoch + 1, 
             "train_loss": train_loss, 
             "val_loss": val_loss,
-            "epoch_time_seconds": epoch_duration
+            "epoch_time_seconds": epoch_duration,
+            "learning_rate": lr
         })
         log_message = f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}, Epoch Time: {epoch_duration:.2f}s'
         print(log_message)
@@ -950,24 +951,24 @@ def train_unrolled_network(num_cascades,
             file.write(log_message + "\n")
 
     wandb.finish()
+    # Save models
+    save_model(model, "saved_unrolled_model")
+    
     test_results = test_unrolled_network(model, dataloader_test, criterion, base_dir)
     
     # Log test results
     log_test_results(test_results, output_path)
     
-    # Save models
-    save_model(model, "saved_unrolled_model")
-    
     writer.close()
     # return model, test_set
 
-def test_unrolled_network(model, dataloader_test, dataloader, criterion, base_dir):
+def test_unrolled_network(model, dataloader_test, criterion, base_dir):
     """
     Test the unrolled network and log results.
     """
     model.eval()
     criterion = nn.MSELoss()  # Assuming L2 loss for evaluation
-    total_loss = 0
+    losses = []
 
     psnrs = []
     ssims = []
@@ -975,21 +976,26 @@ def test_unrolled_network(model, dataloader_test, dataloader, criterion, base_di
     with torch.no_grad():
         for idx, (x, y, m, k) in enumerate(dataloader_test):
             outputs = model(x, k, m)  # x is used as both initial k-space and input
-            loss = criterion(outputs, y)
-            total_loss += loss.item()
             
             save_visualizations(x, y, outputs, idx, base_dir)
             # Calculate PSNR and SSIM for each sample
             for i in range(x.size(0)):
+                losses.append(criterion(outputs[i], y[i]).item())
                 psnrs.append(compute_psnr(outputs[i].cpu().numpy(), y[i].cpu().numpy()))
                 ssims.append(compute_ssim(outputs[i].cpu().numpy(), y[i].cpu().numpy()))
     
-    test_loss = total_loss / len(dataloader_test)
+    test_loss = torch.mean(torch.tensor(losses))
     mean_psnr = sum(psnrs) / len(psnrs)
     mean_ssim = sum(ssims) / len(ssims)
 
     print(f"Test Loss: {test_loss:.6f}, Mean PSNR: {mean_psnr:.4f}, Mean SSIM: {mean_ssim:.4f}")
-    return test_loss, mean_psnr, mean_ssim
+        # Calculate statistics
+    metrics = {
+        'loss': {'mean': torch.mean(torch.tensor(losses)), 'std': torch.std(torch.tensor(losses))},
+        'psnr': {'mean': torch.mean(torch.tensor(psnrs)), 'std': torch.std(torch.tensor(psnrs))},
+        'ssim': {'mean': torch.mean(torch.tensor(ssims)), 'std': torch.std(torch.tensor(ssims))}
+    }
+    return metrics
 
 if __name__ == "__main__":
     # train(in_channels=20,
@@ -1002,7 +1008,7 @@ if __name__ == "__main__":
     #   loss_tpe='L2'
     # )
     train_unrolled_network(
-        num_cascades=2,
+        num_cascades=3,
         in_channels=20,
         out_channels=20,
         init_features=64,
@@ -1012,3 +1018,5 @@ if __name__ == "__main__":
         initial_lr=1e-4,
         loss_tpe='L2'
     )
+    # model = UnrolledNetwork(2, 20, 20, 64)
+    # model.load_state_dict(torch.load("./saved_unrolled_model"))

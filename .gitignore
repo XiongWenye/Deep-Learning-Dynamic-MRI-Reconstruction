@@ -2,3 +2,4 @@ cine.npz
 runs
 wandb
 __pycache__
+new_resnet_model/*
