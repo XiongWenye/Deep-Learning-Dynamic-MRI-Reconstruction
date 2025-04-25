@@ -1,0 +1,6 @@
+new_resnet_model/*
+cine.npz
+runs/*
+wandb/*
+__pycache__
+
