@@ -1,6 +1,5 @@
-new_resnet_model/*
 cine.npz
-runs/*
-wandb/*
+runs
+wandb
 __pycache__
-
+new_resnet_model/*
