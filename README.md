@@ -2,7 +2,7 @@
 
 <div class="figure">
     <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/pipeline.png" alt="Pipeline">
-    <p class="caption">Fig: Overall architecture of our proposed reconstruction network with dual UNet branches for real and imaginary components and 3D ResNet for temporal fusion</p>
+    <figcaption>Fig: Overall architecture of our proposed reconstruction network with dual UNet branches for real and imaginary components and 3D ResNet for temporal fusion</figcaption>
 </div>
 
 This is a repository for the project "Deep Learning for Dynamic MRI Reconstruction" as part of the course BME1312 Artificial Intelligence in Biomedical Imaging at ShanghaiTech University. The project focuses on using deep learning techniques to reconstruct dynamic MRI images from undersampled data.
