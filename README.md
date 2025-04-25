@@ -2,9 +2,10 @@
 <div align="center">
     <figure>
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/pipeline.png" alt="Pipeline">
-        <figcaption>Fig: Overall architecture of our proposed reconstruction network with dual UNet branches for real and imaginary components and 3D ResNet for temporal fusion</figcaption>
+            <figcaption><em>Fig: Overall architecture of our proposed reconstruction network with dual UNet branches for real and imaginary components and 3D ResNet for temporal fusion</em></figcaption>
     </figure>
 </div>
+
 
 This is a repository for the project "Deep Learning for Dynamic MRI Reconstruction" as part of the course BME1312 Artificial Intelligence in Biomedical Imaging at ShanghaiTech University. The project focuses on using deep learning techniques to reconstruct dynamic MRI images from undersampled data.
 
@@ -59,7 +60,7 @@ Below are some examples of the aliased images generated from the original images
     </div>
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/under_sampling_5.png" alt="Aliased Image 2">
-        <p class="caption">Fig: Aliased image resulting from 5x undersampling of the cardiac MRI data</p>
+        <p class="caption"><em>Fig: Aliased image resulting from 5x undersampling of the cardiac MRI data</em></p>
     </div>
 </div>
 
@@ -68,19 +69,17 @@ And here are the comparison of the aliased images with the original images. We a
 <div align="center">
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_0.png" alt="Undersampling Patterns Frame 0">
-        <p class="caption">Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frame 0</p>
     </div>
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_1.png" alt="Undersampling Patterns Frame 1">
-        <p class="caption">Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frame 1</p>
     </div>
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_2.png" alt="Undersampling Patterns Frame 2">
-        <p class="caption">Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frame 2</p>
+        <p class="caption"><em>Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frames</em></p>
     </div>
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/mask.png" alt="Multiple Sampling Masks">
-        <p class="caption">Fig: Multiple sampling masks showing the variable density patterns across different temporal frames</p>
+        <p class="caption"><em>Fig: Multiple sampling masks showing the variable density patterns across different temporal frames</em></p>
     </div>
 </div>
 
@@ -121,7 +120,7 @@ The whole structure is shown in the figure below.
 <div align="center">
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/pipeline.png" alt="Reconstruction Network">
-        <p class="caption">Fig: Detailed architecture of our reconstruction network showing dual UNet branches for processing real and imaginary components separately, followed by a 3D ResNet for temporal fusion across frames</p>
+        <p class="caption"><em>Fig: Detailed architecture of our reconstruction network showing dual UNet branches for processing real and imaginary components separately, followed by a 3D ResNet for temporal fusion across frames</em></p>
     </div>
 </div>
 
@@ -143,19 +142,19 @@ Using the above parameters, we achieved a PSNR of 29.08446121 and SSIM of 0.8443
 <div align="center">
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/reconstruction_1.png" alt="Reconstructed Image1">
-        <figcaption>Fig 1: Reconstructed cardiac MRI image using our deep learning model</figcaption>
+        <figcaption><em>Fig 1: Reconstructed cardiac MRI image using our deep learning model</em></figcaption>
     </div>
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/full_sampling_1.png" alt="Full Sampling Image1">
-        <figcaption>Fig 2: Fully sampled reference cardiac MRI image (ground truth)</figcaption>
+        <figcaption><em>Fig 2: Fully sampled reference cardiac MRI image (ground truth)</em></figcaption>
     </div>
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/reconstruction_1.png" alt="Reconstructed Image2">
-        <figcaption>Fig 3: Another view of the reconstructed cardiac MRI image</figcaption>
+        <figcaption><em>Fig 3: Another view of the reconstructed cardiac MRI image</em></figcaption>
     </div>
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/full_sampling_1.png" alt="Full Sampling Image2">
-        <figcaption>Fig 4: Corresponding fully sampled reference image for comparison</figcaption>
+        <figcaption><em>Fig 4: Corresponding fully sampled reference image for comparison</em></figcaption>
     </div>
 </div>
 
