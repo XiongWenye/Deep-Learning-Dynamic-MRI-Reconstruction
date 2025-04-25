@@ -1,6 +1,7 @@
 # Deep-Learning-Dynamic-MRI-Reconstruction
 
 ![Pipeline](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/pipeline.png)
+*Fig: Overall architecture of our proposed reconstruction network with dual UNet branches for real and imaginary components and 3D ResNet for temporal fusion*
 
 This is a repository for the project "Deep Learning for Dynamic MRI Reconstruction" as part of the course BME1312 Artificial Intelligence in Biomedical Imaging at ShanghaiTech University. The project focuses on using deep learning techniques to reconstruct dynamic MRI images from undersampled data.
 
@@ -9,6 +10,11 @@ We generate variable density undersampling patterns with acceleration factor 5 a
 
 ## TO START
 1. Clone the repository and download the dataset from [here](https://drive.google.com/file/d/1bhTKXgJm4aL1C5ollUoRh1JLarJO9Yxu/view?usp=sharing)
+
+Our dataset cine. npz is a fully sampled cardiac cine MR image with the size of [nsamples, nt, nx, ny]
+where nsamples is the number of samples, nt is the number of frames, nx and ny are the dimensions of the image. 
+
+```bash
 
 2. Install the required packages:
 ```bash
@@ -35,26 +41,97 @@ We also plot the undersampling mask for one dynamic frame and
 undersampling masks in the ky-t dimension.
 ![Undersampling Mask](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/undersampling_mask.png)
 
-We also obtained the aliased images as a result of the undersampling process with the generated patterns. For this we use the formula:
+We also obtained the aliased images as a result of the undersampling process with the generated patterns. For this we use the formula:  
+
 $$
 b = F^{-1} \cdot U \cdot F \cdot m
-$$
+$$  
+
 where $b$ is the aliased image, $F$ is the Fourier transform, $U$ is the undersampling mask, and $m$ is the original image. The aliased images are then used as input to the deep learning model for reconstruction.
 
 Below are some examples of the aliased images generated from the original images.
-![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/under_sampling_1.png)
-![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/under_sampling_5.png)
+![Aliased Image 1](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/under_sampling_1.png)
+
+![Aliased Image 2](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/under_sampling_5.png)
+*Fig: Aliased image resulting from 5x undersampling of the cardiac MRI data*
 
 And here are the comparison of the aliased images with the original images. We also show the sampling masks for some frames. It is noticeable that different frames have different sampling masks, which is a key feature of our approach to Deep Learning based reconstruction.
 
 ![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_0.png)
+*Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frame 0*
+
 ![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_1.png)
+*Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frame 1*
+
 ![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_2.png)
+*Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frame 2*
+
 ![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/mask.png)
+*Fig: Multiple sampling masks showing the variable density patterns across different temporal frames*
 
 It is also clear to see that, for different dynamic frames, the undersampling masks are different.
 
 ## Reconstruction Network
+
+All the details of the network are in the train.py file. 
+
+To explore the temporal correlation, we chose to stack the dynamic images along the channel dimension. However, this brought out a problem as the input image is pseudo-complex, and the real and imaginary parts are not aligned. To solve this, we split the input into two branches, one for the real part and one for the imaginary part. The two branches are then concatenated at the end of the UNet structure. We added attention mechanisms to the bottleneck layer of the UNet structure to better capture the spatial correlation and channel correlation.   
+
+However, UNet is a 2D structure, and the temporal correlation is not well captured. 
+To solve this, we added a 3D ResNet structure after the UNet structure to better achieve this goal.
+
+So in general, the reconstruction network consists of three components:
+
+### Dual 2D UNet Architecture (Real & Imaginary Components)
+Purpose: Process the real and imaginary parts of the complex MRI data  
+
+Features:
+- Encoder-decoder structure with skip connections
+- Attention mechanism in the bottleneck layer
+- Dropout (p=0.3) for regularization
+- LeakyReLU activation (negative_slope=0.1)
+- Weight Regularization for better training stability
+- Channel and spatial attention modules
+
+### 3D ResNet (Temporal Fusion)
+Purpose: Integrate temporal information across the MRI sequence  
+
+Features:
+- 3D convolutions to process the temporal dimension
+- Residual connections for better gradient flow
+- Lightweight design with one residual block per layer
+- Final 1×1×1 convolution to map features to output channels
+
+The whole structure is shown in the figure below.
+![Reconstruction Network](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/pipeline.png)
+*Fig: Detailed architecture of our reconstruction network showing dual UNet branches for processing real and imaginary components separately, followed by a 3D ResNet for temporal fusion across frames*
+
+### Training and Evaluation
+Below are the details of the training parameters:
+``` python
+train(in_channels=20,
+      out_channels=20,
+      init_features=64,
+      num_epochs=800,
+      weight_decay=1e-4,
+      batch_size=10,
+      initial_lr=1e-4,
+      loss_tpe='L2'
+    )
+```
+
+Using the above parameters, we achieved a PSNR of 29.08446121 and SSIM of 0.84434632, which is a remarkable improvement over the aliased images. The whole training process took about 2 hours on a single NVIDIA RTX 2080 Ti GPU. More detailed results can be found in the output.txt file. We are also happy to show you some of the reconstructed images compared to the original images.
+![Reconstructed Image1](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/reconstruction_1.png)
+*Fig 1: Reconstructed cardiac MRI image using our deep learning model*
+
+![Full Sampling Image1](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/full_sampling_1.png)
+*Fig 2: Fully sampled reference cardiac MRI image (ground truth)*
+
+![Reconstructed Image2](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/reconstruction_1.png)
+*Fig 3: Another view of the reconstructed cardiac MRI image*
+
+![Full Sampling Image2](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/full_sampling_1.png)
+*Fig 4: Corresponding fully sampled reference image for comparison*
 
 ## Discussion on the Effect of Dropout, Dynamic Learning Rate Schedules, and Loss Functions
 
