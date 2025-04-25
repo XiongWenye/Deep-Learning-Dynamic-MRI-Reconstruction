@@ -20,7 +20,6 @@ We generate variable density undersampling patterns with acceleration factor 5 a
 Our dataset cine. npz is a fully sampled cardiac cine MR image with the size of [nsamples, nt, nx, ny]
 where nsamples is the number of samples, nt is the number of frames, nx and ny are the dimensions of the image. 
 
-```bash
 
 2. Install the required packages:
 ```bash
