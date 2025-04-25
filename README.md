@@ -1,5 +1,5 @@
 # Deep-Learning-Dynamic-MRI-Reconstruction
-<div style="text-align: center;">
+<div align="center">
     <figure>
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/pipeline.png" alt="Pipeline">
         <figcaption>Fig: Overall architecture of our proposed reconstruction network with dual UNet branches for real and imaginary components and 3D ResNet for temporal fusion</figcaption>
@@ -53,7 +53,7 @@ $$
 where $b$ is the aliased image, $F$ is the Fourier transform, $U$ is the undersampling mask, and $m$ is the original image. The aliased images are then used as input to the deep learning model for reconstruction.
 
 Below are some examples of the aliased images generated from the original images.
-<div style="text-align: center;">
+<div align="center">
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/under_sampling_1.png" alt="Aliased Image 1">
     </div>
@@ -65,7 +65,7 @@ Below are some examples of the aliased images generated from the original images
 
 And here are the comparison of the aliased images with the original images. We also show the sampling masks for some frames. It is noticeable that different frames have different sampling masks, which is a key feature of our approach to Deep Learning based reconstruction.
 
-<div style="text-align: center;">
+<div align="center">
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_0.png" alt="Undersampling Patterns Frame 0">
         <p class="caption">Fig: Comparison between fully sampled (left), undersampled (middle), and corresponding sampling mask (right) for frame 0</p>
@@ -118,7 +118,7 @@ Features:
 - Final 1×1×1 convolution to map features to output channels
 
 The whole structure is shown in the figure below.
-<div style="text-align: center;">
+<div align="center">
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/pipeline.png" alt="Reconstruction Network">
         <p class="caption">Fig: Detailed architecture of our reconstruction network showing dual UNet branches for processing real and imaginary components separately, followed by a 3D ResNet for temporal fusion across frames</p>
@@ -140,7 +140,7 @@ train(in_channels=20,
 ```
 
 Using the above parameters, we achieved a PSNR of 29.08446121 and SSIM of 0.84434632, which is a remarkable improvement over the aliased images. The whole training process took about 2 hours on a single NVIDIA RTX 2080 Ti GPU. More detailed results can be found in the output.txt file. We are also happy to show you some of the reconstructed images compared to the original images.
-<div style="text-align: center;">
+<div align="center">
     <div class="figure">
         <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/reconstruction_1.png" alt="Reconstructed Image1">
         <figcaption>Fig 1: Reconstructed cardiac MRI image using our deep learning model</figcaption>
