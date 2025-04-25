@@ -485,7 +485,7 @@ def process_data():
         plt.colorbar()
         
         plt.subplot(1, 3, 3)
-        plt.imshow(np.abs(mask[0, 0].numpy()), cmap='gray')
+        plt.imshow(np.abs(mask[0, i].numpy()), cmap='gray')
         plt.title('Sampling Mask')
         plt.colorbar()
         
