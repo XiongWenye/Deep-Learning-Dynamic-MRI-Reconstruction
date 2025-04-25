@@ -6,6 +6,8 @@
     </figure>
 </div>
 
+&nbsp;
+
 
 This is a repository for the project "Deep Learning for Dynamic MRI Reconstruction" as part of the course BME1312 Artificial Intelligence in Biomedical Imaging at ShanghaiTech University. The project focuses on using deep learning techniques to reconstruct dynamic MRI images from undersampled data.
 
@@ -149,11 +151,11 @@ Using the above parameters, we achieved a PSNR of 29.08446121 and SSIM of 0.8443
         <figcaption><em>Fig 2: Fully sampled reference cardiac MRI image (ground truth)</em></figcaption>
     </div>
     <div class="figure">
-        <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/reconstruction_1.png" alt="Reconstructed Image2">
+        <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/reconstruction_2.png" alt="Reconstructed Image2">
         <figcaption><em>Fig 3: Another view of the reconstructed cardiac MRI image</em></figcaption>
     </div>
     <div class="figure">
-        <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/full_sampling_1.png" alt="Full Sampling Image2">
+        <img src="https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/full_sampling_2.png" alt="Full Sampling Image2">
         <figcaption><em>Fig 4: Corresponding fully sampled reference image for comparison</em></figcaption>
     </div>
 </div>
