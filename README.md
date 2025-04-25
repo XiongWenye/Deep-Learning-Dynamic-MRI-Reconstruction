@@ -26,6 +26,29 @@ After that, you can find the undersampled images, reconstructed images in the im
 
 ## Variable Density Random Undersampling Pattern Generation
 
+We generate a variable density random undersampling pattern (U) with the size of 
+the given cine images for acceleration factor of 5. Eleven central k-space lines are sampled 
+for each frame. Each sampling pattern must be a matrix with 1s in the sampled positions 
+and  0s  in  the  remaining  ones. 
+
+We also plot the undersampling mask for one dynamic frame and 
+undersampling masks in the ky-t dimension.
+![Undersampling Mask](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/undersampling_mask.png)
+
+We also obtained the aliased images as a result of the undersampling process with the generated patterns. For this we use the formula:
+$$
+b = F^{-1} \cdot U \cdot F \cdot m
+$$
+where $b$ is the aliased image, $F$ is the Fourier transform, $U$ is the undersampling mask, and $m$ is the original image. The aliased images are then used as input to the deep learning model for reconstruction.
+
+Below are some examples of the aliased images generated from the original images.
+![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_0.png)
+![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_1.png)
+![Undersampling Patterns](https://github.com/XiongWenye/xiongwenye.github.io/blob/master/files/Deep%20Learning%20Dynamic%20MRI%20Reconstruction/comparison_image_2.png)
+
+
+It is also clear to see that, for different dynamic frames, the undersampling masks are different.
+
 ## Reconstruction Network
 
 ## Discussion on the Effect of Dropout, Dynamic Learning Rate Schedules, and Loss Functions
