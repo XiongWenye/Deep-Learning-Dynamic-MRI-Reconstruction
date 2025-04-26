@@ -161,6 +161,97 @@ Using the above parameters, we achieved a PSNR of 29.08446121 and SSIM of 0.8443
 
 ## Discussion on the Effect of Dropout, Dynamic Learning Rate Schedules, and Loss Functions
 
+We investigated the impact of several training components on the reconstruction performance: dropout, dynamic learning rate schedules, and the choice of loss function (L1 vs. L2).
+
+### Impact of Dropout and Dynamic Learning Rate
+
+We trained a model variant without dropout and without a dynamic learning rate schedule (using a constant learning rate). The training and validation loss curves are shown below:
+
+<div align="center">
+    <figure>
+        <img src="assets/Training Loss and Validation Loss No opt.png" alt="Training and Validation Loss without Optimizations">
+        <figcaption><em>Fig: Training and Validation Loss Curves without Dropout and Dynamic Learning Rate</em></figcaption>
+    </figure>
+</div>
+
+Performance Metrics (No Dropout/Dynamic LR):
+-   Loss: mean = 0.00343, std = 0.00127
+-   PSNR: mean = 24.154, std = 1.858
+-   SSIM: mean = 0.743, std = 0.037
+
+#### Analysis:
+The validation loss curve shows significant fluctuations and a tendency to increase towards the end of training, indicating overfitting. Compared to the original model (PSNR: 29.08, SSIM: 0.844), the performance is considerably lower. This highlights the importance of dropout for regularization and dynamic learning rate schedules for stable convergence and avoiding overfitting.
+
+### Impact of L1 vs. L2 Loss Function
+
+We trained another model variant using the L1 loss function instead of the default L2 loss, while keeping dropout and the dynamic learning rate schedule active.
+
+<div align="center">
+    <figure>
+        <img src="assets/Training Loss and Validation Loss L1.png" alt="Training and Validation Loss with L1 Loss">
+        <figcaption><em>Fig: Training and Validation Loss Curves using L1 Loss</em></figcaption>
+    </figure>
+</div>
+
+Performance Metrics (L1 Loss):
+-   Loss: mean = 0.02228, std = 0.00549
+-   PSNR: mean = 29.151, std = 2.241
+-   SSIM: mean = 0.844, std = 0.042
+
+Performance Metrics (Original L2 Loss):
+-   Loss: mean = 0.00135, std = 0.00055
+-   PSNR: mean = 29.084, std = 1.932
+-   SSIM: mean = 0.844, std = 0.037
+
+#### Analysis:
+The L1 loss values are inherently larger than L2 loss values, which is reflected in the mean loss. However, the PSNR and SSIM achieved with L1 loss are very similar to those achieved with L2 loss, with L1 showing a slightly higher mean PSNR. The training curve appears stable. While L1 loss can sometimes promote sparsity, L2 loss often leads to smoother results and is more sensitive to large errors. In this case, both loss functions yield comparable high-quality reconstructions, but the original configuration with L2 loss achieved slightly better stability (lower standard deviation in metrics) and significantly lower loss values.
+
+### Conclusion:
+The experiments demonstrate that dropout and dynamic learning rate schedules are crucial for achieving optimal performance and preventing overfitting. Both L1 and L2 loss functions can lead to good results, with L2 providing slightly more stable performance metrics in our final configuration. The original setup (with dropout, dynamic LR, and L2 loss) provided the best balance of performance and stability.
+
 ## Unrolled Denoising Network with Data Consistency Layer
 
-TODO: Finsh the README file based on the Headings above
+We explored an unrolled network architecture incorporating data consistency layers between cascaded instances of our base reconstruction network. This approach aims to iteratively refine the reconstruction by enforcing consistency with the acquired k-space data after each denoising step.
+
+We trained models with 2 cascades (Cascade 2) and 3 cascades (Cascade 3).
+
+### Cascade 2 Results
+-   Training: Required 18GB GPU memory, trained for 300 epochs. Average time per epoch: ~12 seconds.
+-   Performance Metrics:
+    -   Loss: mean = 0.00143, std = 0.00057
+    -   PSNR: mean = 28.866, std = 2.048
+    -   SSIM: mean = 0.834, std = 0.030
+
+### Cascade 3 Results
+-   Training: Required 24GB GPU memory, trained for 300 epochs. Average time per epoch: ~360 seconds (6 minutes).
+-   Performance Metrics:
+    -   Loss: mean = 0.00137, std = 0.00051
+    -   PSNR: mean = 28.958, std = 1.813
+    -   SSIM: mean = 0.807, std = 0.041
+
+<div align="center">
+    <figure>
+        <img src="assets/Training Loss and Validation Loss Unrolled.png" alt="Training and Validation Loss for Cascade 3">
+        <figcaption><em>Fig: Training and Validation Loss Curves for the 3-Cascade Unrolled Network</em></figcaption>
+    </figure>
+</div>
+
+### Comparison and Discussion
+
+| Model         | Epochs | Avg Epoch Time | GPU Mem | Loss (mean ± std)     | PSNR (mean ± std)   | SSIM (mean ± std)   |
+| :------------ | :----- | :------------- | :------ | :-------------------- | :------------------ | :------------------ |
+| Original      | 800    | ~6 sec         | ~10GB   | 0.00135 ± 0.00055     | 29.084 ± 1.932      | 0.844 ± 0.037       |
+| Cascade 2     | 300    | ~12 sec        | 18GB    | 0.00143 ± 0.00057     | 28.866 ± 2.048      | 0.834 ± 0.030       |
+| Cascade 3     | 300    | ~360 sec       | 24GB    | 0.00137 ± 0.00051     | 28.958 ± 1.813      | 0.807 ± 0.041       |
+
+### Observations:
+-   Increasing the number of cascades significantly increased GPU memory requirements and training time per epoch.
+-   Both cascaded models were trained for only 300 epochs due to time and resource constraints, compared to 800 epochs for the original model.
+-   The performance (PSNR, SSIM) of the cascaded models did not surpass the original single network. Cascade 3 showed slightly better PSNR than Cascade 2 but worse SSIM than both Cascade 2 and the original model. The validation loss for Cascade 3 also appears less stable than the original model's later epochs.
+
+### Potential Reasons for Limited Improvement:
+1.  **Insufficient Training Data:** The dataset size (200 samples) might be insufficient, especially for deeper unrolled networks. Data augmentation using more undersampling masks could potentially help.
+2.  **Base Network Complexity:** The original network is relatively large. It might not have fully converged even after 800 epochs, potentially reaching a local minimum sufficient for good performance but hindering effective iterative refinement in the unrolled setting.
+3.  **Training Constraints:** Limited training epochs (300 vs. 800) due to significantly increased training time and memory usage likely prevented the cascaded models from reaching their full potential convergence.
+
+Further investigation with more extensive data augmentation, potentially a smaller base network, and longer training times would be needed to fully evaluate the potential of the unrolled architecture.
