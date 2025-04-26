@@ -96,6 +96,14 @@ ShanghaiTech University
 
 ---
 
+## Creativity: Addressing Challenges in Network Design
+
+* **Challenge 1: Pseudo-Complex Input:** Stacking dynamic images along the channel dimension created issues as real/imaginary parts weren't aligned.
+* **Solution 1: Dual UNet Branches:** Split input into separate real and imaginary processing branches using two UNets, concatenating them later. Added attention in bottlenecks to enhance spatial/channel correlation capture.
+* **Challenge 2: Capturing Temporal Correlation:** Standard 2D UNet structures don't effectively model changes over time.
+* **Solution 2: 3D ResNet Integration:** Added a 3D ResNet structure after the UNets specifically to process and fuse information across the temporal dimension (frames).
+
+---
 ## Network Architecture Detail
 
 <div align="center">
