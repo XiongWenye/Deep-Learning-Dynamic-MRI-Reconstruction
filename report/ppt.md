@@ -71,6 +71,15 @@ ShanghaiTech University
 
 ---
 
+<div align="center">
+  <figure>
+    <img src="../assets/mask.png" alt="Comparison Frame 2" width="550">
+  </figure>
+</div>
+It is also clear to see that, for different dynamic frames, the undersampling masks are different.
+
+---
+
 ## Reconstruction Network: Dual UNet
 
 *   **Purpose:** Process real and imaginary parts separately.
