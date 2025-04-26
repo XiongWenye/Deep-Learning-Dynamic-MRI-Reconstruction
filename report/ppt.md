@@ -167,10 +167,11 @@ ShanghaiTech University
 
 ## Ablation: Impact of L1 vs. L2 Loss
 
-*   **Model:** Trained with L1 Loss (keeping Dropout/Dynamic LR).
-*   **Results (L1):** PSNR: 29.151, SSIM: 0.844
-*   **Results (L2):** PSNR: 29.084, SSIM: 0.844
-*   **Observation:** L1 yields slightly higher PSNR but similar SSIM. L2 loss values are much smaller. L1 may favor pixel accuracy, L2 may yield smoother results. Both perform well. Original L2 model chosen for stability.
+* **Results (L1):** PSNR: 29.1511, SSIM: 0.8439
+* **Results (L2):** PSNR: 29.0845, SSIM: 0.8443
+* **PSNR vs. SSIM Trade-off:** L1 loss can lead to higher PSNR (pixel accuracy) but potentially lower SSIM (structural similarity) because it doesn't explicitly enforce structural consistency. In this specific case, SSIM was similar for both.
+* **Observations:** Both loss functions yielded high-quality reconstructions. L2 loss resulted in much lower mean loss values and slightly better metric stability (lower std dev).
+* **Recommendation:** Use L1/L2 if pixel recovery is the priority; consider structure-aware losses (e.g., L1+SSIM) if perceptual quality/structural fidelity is crucial. The original L2 model was retained for stability.
 
 ---
 
@@ -188,11 +189,11 @@ ShanghaiTech University
 *   **Models:** 2 Cascades (C2), 3 Cascades (C3).
 *   **Training:** Increased memory/time significantly. Trained only 300 epochs.
 
-| Model      | Epochs | GPU Mem | PSNR   | SSIM   |
-| :--------- | :----- | :------ | :----- | :----- |
-| Original   | 800    | ~10GB   | 29.08  | 0.844  |
-| Cascade 2  | 300    | 18GB    | 28.87  | 0.834  |
-| Cascade 3  | 300    | 24GB    | 28.96  | 0.807  |
+| Model     | Epochs | GPU Mem | PSNR  | SSIM  |
+| :-------- | :----- | :------ | :---- | :---- |
+| Original  | 800    | ~10GB   | 29.08 | 0.844 |
+| Cascade 2 | 300    | 18GB    | 28.87 | 0.834 |
+| Cascade 3 | 300    | 24GB    | 28.96 | 0.807 |
 
 *   **Observation:** Performance did not improve over original model, possibly due to limited training data/epochs or base network complexity.
 
