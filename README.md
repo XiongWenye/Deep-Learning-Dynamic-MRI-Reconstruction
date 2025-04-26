@@ -196,12 +196,12 @@ We trained another model variant using the L1 loss function instead of the defau
 Performance Metrics (L1 Loss):
 -   Loss: mean = 0.02228, std = 0.00549
 -   PSNR: mean = 29.151, std = 2.241
--   SSIM: mean = 0.844, std = 0.042
+-   SSIM: mean = 0.84389, std = 0.042
 
 Performance Metrics (Original L2 Loss):
 -   Loss: mean = 0.00135, std = 0.00055
 -   PSNR: mean = 29.084, std = 1.932
--   SSIM: mean = 0.844, std = 0.037
+-   SSIM: mean = 0.84434, std = 0.037
 
 #### Analysis:
 The L1 loss values are inherently larger than L2 loss values, which is reflected in the mean loss. However, the PSNR and SSIM achieved with L1 loss are very similar to those achieved with L2 loss.
