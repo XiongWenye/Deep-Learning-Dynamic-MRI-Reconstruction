@@ -204,7 +204,27 @@ Performance Metrics (Original L2 Loss):
 -   SSIM: mean = 0.844, std = 0.037
 
 #### Analysis:
-The L1 loss values are inherently larger than L2 loss values, which is reflected in the mean loss. However, the PSNR and SSIM achieved with L1 loss are very similar to those achieved with L2 loss, with L1 showing a slightly higher mean PSNR. The training curve appears stable. While L1 loss can sometimes promote sparsity, L2 loss often leads to smoother results and is more sensitive to large errors. In this case, both loss functions yield comparable high-quality reconstructions, but the original configuration with L2 loss achieved slightly better stability (lower standard deviation in metrics) and significantly lower loss values.
+The L1 loss values are inherently larger than L2 loss values, which is reflected in the mean loss. However, the PSNR and SSIM achieved with L1 loss are very similar to those achieved with L2 loss.
+
+In our experiments on dynamic MRI reconstruction, we observed an interesting fact that using L1 loss led to **higher PSNR** but **lower SSIM** compared to using other loss functions.
+
+This phenomenon can be explained as follows:
+
+- PSNR (Peak Signal-to-Noise Ratio) measures pixel-wise accuracy and is closely related to the mean squared error (MSE). Although L1 loss optimizes absolute error instead of squared error, it still effectively reduces the overall pixel-level discrepancy, thereby improving PSNR.
+
+- SSIM (Structural Similarity Index) evaluates the structural similarity between images, focusing on local patterns of luminance, contrast, and structure. While L1 loss minimizes the global error, it does not explicitly encourage structural consistency. As a result, even small spatial misalignments or distortions — which may have little impact on PSNR — can lead to a noticeable drop in SSIM.
+
+In short, L1 loss favors pixel-wise precision but may compromise local structural integrity, which explains the observed trade-off between higher PSNR and lower SSIM.
+
+To address this, one potential solution is to design a composite loss function that balances pixel accuracy and structural preservation, such as combining L1 loss with SSIM loss or perceptual loss based on feature space similarity.
+
+The training curve appears stable. While L1 loss can sometimes promote sparsity, L2 loss often leads to smoother results and is more sensitive to large errors. In this case, both loss functions yield comparable high-quality reconstructions, but the original configuration with L2 loss achieved slightly better stability (lower standard deviation in metrics) and significantly lower loss values.
+
+Ultimately, the choice of loss function should be guided by the final objective of the task:
+
+- If precise pixel recovery is the goal, prioritizing PSNR with L1 or L2 loss may suffice.
+
+- If maintaining perceptual quality and structural fidelity is crucial (e.g., in clinical imaging), incorporating structure-aware losses is strongly recommended.
 
 ### Conclusion:
 The experiments demonstrate that dropout and dynamic learning rate schedules are crucial for achieving optimal performance and preventing overfitting. Both L1 and L2 loss functions can lead to good results, with L2 providing slightly more stable performance metrics in our final configuration. The original setup (with dropout, dynamic LR, and L2 loss) provided the best balance of performance and stability.
