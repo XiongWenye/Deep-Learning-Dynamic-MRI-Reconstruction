@@ -515,7 +515,7 @@ def train(
     # Create output directory for logging
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "no_pipeline.txt")
+    output_path = os.path.join(output_dir, "one_unet.txt")
 
     # Load and prepare data
     inputs, labels, mask = process_data() # inputs shape (N, 20, 3, H, W), labels shape (N, 20, H, W)
