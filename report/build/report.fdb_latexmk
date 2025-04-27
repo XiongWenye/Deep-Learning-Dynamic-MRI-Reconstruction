@@ -1,9 +1,9 @@
 # Fdb version 4
-["pdflatex"] 1745752079.37683 "/Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex" "build/report.pdf" "report" 1745752094.84746 0
-  "../assets/Training Loss and Validation Loss L1.png" 1745752078.91857 45601 c2d743cdad7a4273226bdc02cd38a923 ""
-  "../assets/Training Loss and Validation Loss No opt.png" 1745752078.95172 71482 cbd5135ad388f7f69c6ef86b81d3f77e ""
-  "../assets/Training Loss and Validation Loss Unrolled.png" 1745752078.9778 42638 d6a0cd86e872e483e87eb8b7ee11253d ""
-  "../assets/Training Loss and Validation Loss.png" 1745752078.88719 44336 a2d996a6a3c53af158bb8210e6e7dd22 ""
+["pdflatex"] 1745752720.66321 "/Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex" "build/report.pdf" "report" 1745752735.98196 0
+  "../assets/Training Loss and Validation Loss L1.png" 1745752193.15147 45601 c2d743cdad7a4273226bdc02cd38a923 ""
+  "../assets/Training Loss and Validation Loss No opt.png" 1745752193.18468 71482 cbd5135ad388f7f69c6ef86b81d3f77e ""
+  "../assets/Training Loss and Validation Loss Unrolled.png" 1745752193.21119 42638 d6a0cd86e872e483e87eb8b7ee11253d ""
+  "../assets/Training Loss and Validation Loss.png" 1745752193.12056 44336 a2d996a6a3c53af158bb8210e6e7dd22 ""
   "../assets/comparison_image_0.png" 1745749103.44004 155546 55c5ce6860e27c7d8bd296f6b285b5ee ""
   "../assets/comparison_image_1.png" 1745749103.4412 175477 905bc8343b213deab2ea5caccfff6e36 ""
   "../assets/comparison_image_2.png" 1745749103.44395 158278 0bea0e325abe37a2fef3b9573702887c ""
@@ -20,7 +20,7 @@
   "../images/No_opt/under_sampling/under_sampling_1.png" 1745656246.8477 1719940 c3a80d50b4676be869d7ade55043fc6d ""
   "../images/No_opt/under_sampling/under_sampling_2.png" 1745656246.85398 1759576 d390d0d5bbf8e8db1fda6dbf07c9d463 ""
   "../images/compare.PNG" 1745750887 45319 8f1027edc3f8cfc3a801a6d72a86523a ""
-  "/Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex" 1745751482.95587 28707 f8bc1b0645e18350a842dfd616815cc1 ""
+  "/Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex" 1745752705.07845 28705 cc7e69291e5a4664f8560502d3b36b1e ""
   "/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -137,10 +137,10 @@
   "/usr/local/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1729415491.25042 5467645 128b85b7cde5f5edc5cb7f1dd7ff8736 ""
   "/usr/local/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1729415459 8221430 1962cbf263a11e1a0ff8560c308722e4 ""
   "/usr/local/texlive/2024/texmf.cnf" 1710266656 577 e590dabc9e28c5b61546e15f63eebcdf ""
-  "build/report.aux" 1745752094.77016 7778 fa66c83a7f3a86c76d05209b9f34bf32 "pdflatex"
-  "build/report.out" 1745752094.77076 3799 28098c334dbbaa31caa8b958e3162d31 "pdflatex"
+  "build/report.aux" 1745752735.91846 7778 1ebd95fac9642671939a5eac8b0a6616 "pdflatex"
+  "build/report.out" 1745752735.91909 3799 28098c334dbbaa31caa8b958e3162d31 "pdflatex"
   "neurips_2023.sty" 1745656247.56398 10805 28d0fb5a2cc69f557caea4c6edf26255 ""
-  "report.tex" 1745751482.95587 28707 f8bc1b0645e18350a842dfd616815cc1 ""
+  "report.tex" 1745752705.07845 28705 cc7e69291e5a4664f8560502d3b36b1e ""
   (generated)
   "build/report.aux"
   "build/report.log"

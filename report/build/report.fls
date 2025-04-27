@@ -310,11 +310,6 @@ INPUT ../images/No_opt/reconstruction/reconstruction_2.png
 INPUT ../images/No_opt/reconstruction/reconstruction_2.png
 INPUT ../images/No_opt/reconstruction/reconstruction_2.png
 INPUT ../images/No_opt/reconstruction/reconstruction_2.png
-INPUT ../images/compare.PNG
-INPUT ../images/compare.PNG
-INPUT ../images/compare.PNG
-INPUT ../images/compare.PNG
-INPUT ../images/compare.PNG
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
@@ -325,6 +320,11 @@ INPUT ../assets/Training Loss and Validation Loss.png
 INPUT ../assets/Training Loss and Validation Loss.png
 INPUT ../assets/Training Loss and Validation Loss.png
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmr8c.vf
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
 INPUT ../assets/Training Loss and Validation Loss L1.png
 INPUT ../assets/Training Loss and Validation Loss L1.png
 INPUT ../assets/Training Loss and Validation Loss L1.png

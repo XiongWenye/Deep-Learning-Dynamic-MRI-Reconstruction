@@ -285,13 +285,6 @@ In Figures \ref{fig:full_sampled_no_opt}-\ref{fig:reconstructed_no_opt}, we show
   \label{fig:reconstructed_no_opt}
 \end{figure}
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\linewidth]{../images/compare.PNG}
-  \caption{Comparison of the reconstruction(left) and the ground truth(right) for frame 0.}
-  \label{fig:compare}
-\end{figure}
-
 Comment on the denoising/dealiasing performance (Baseline Model):
 \begin{enumerate}
   \item Denoising: The network reduces some noise compared to the undersampled input, but residual noise and artifacts remain.
@@ -350,7 +343,12 @@ The loss curves for the optimized model (Figure \ref{fig:loss_opt}) show much mo
   \label{fig:loss_opt}
 \end{figure}
 
-
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{../images/compare.PNG}
+  \caption{Comparison of the reconstruction(left) and the ground truth(right) for frame 0.}
+  \label{fig:compare}
+\end{figure}
 
 \section{Compare L1 with L2 Loss}
 \textit{Note: }Detailed reconstruction images, related training loss, validation loss and their
