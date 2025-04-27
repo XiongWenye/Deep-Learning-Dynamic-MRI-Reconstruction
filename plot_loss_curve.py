@@ -16,7 +16,7 @@ output_file_path = Path("./output/output.txt")
 output_file_path_L1 = Path("./output/L1_Loss_output.txt")
 output_file_path_No_Opt = Path("./output/No_Opt_output.txt")
 output_file_path_unrolled = Path("./output/unrolled_output.txt")
-output_file_path_No_res = Path("./output/no_res.txt")
+output_file_path_with_attention = Path("./output/with_attention.txt")
 output_file_path_One_unet = Path("./output/one_unet.txt")
 
 with open(output_file_path, "r") as f:
@@ -147,7 +147,7 @@ plt.close()
 
 train_losses = []
 val_losses = []
-with open(output_file_path_No_res, "r") as f:
+with open(output_file_path_with_attention, "r") as f:
     for line in f:
         if "Train Loss" in line and "Val Loss" in line:
             parts = line.strip().split(",")
@@ -164,10 +164,10 @@ plt.plot(np.log(train_losses), label="Log Train Loss")
 plt.plot(np.log(val_losses), label="Log Validation Loss")
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.title("Training and Validation Loss Curve without residual")
+plt.title("Training and Validation Loss Curve with attention")
 plt.legend()
 plt.grid(True)
-plt.savefig(f"assets/Training Loss and Validation Loss no res.png")
+plt.savefig(f"assets/Training Loss and Validation Loss with attention.png")
 plt.close()
 
 train_losses = []
