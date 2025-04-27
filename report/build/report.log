@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.4.2)  27 APR 2025 19:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.4.2)  27 APR 2025 19:47
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -759,4 +759,191 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 83.
  (e:/texlive/2024/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (e:/texlive/2024/texmf-dist/tex/latex/microtype/mt-msb.cfg
-File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS 
+File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
+)
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 83.
+ (e:/texlive/2024/texmf-dist/tex/latex/base/t1cmtt.fd
+File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `cmtt' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
+ [1
+
+
+{e:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{e:/texlive/2024/texmf-dist/fonts/enc/dvips/base/8r.enc}{e:/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
+<../assets/undersampling_mask.png, id=83, 867.24pt x 361.35pt>
+File: ../assets/undersampling_mask.png Graphic file (type png)
+<use ../assets/undersampling_mask.png>
+Package pdftex.def Info: ../assets/undersampling_mask.png  used on input line 133.
+(pdftex.def)             Requested size: 397.48499pt x 165.62201pt.
+<../assets/mask.png, id=86, 854.2314pt x 681.5061pt>
+File: ../assets/mask.png Graphic file (type png)
+<use ../assets/mask.png>
+Package pdftex.def Info: ../assets/mask.png  used on input line 143.
+(pdftex.def)             Requested size: 317.9892pt x 253.69235pt.
+ [2 <../assets/undersampling_mask.png>]
+<../assets/comparison_image_0.png, id=102, 1084.05pt x 361.35pt>
+File: ../assets/comparison_image_0.png Graphic file (type png)
+<use ../assets/comparison_image_0.png>
+Package pdftex.def Info: ../assets/comparison_image_0.png  used on input line 169.
+(pdftex.def)             Requested size: 397.48499pt x 132.4954pt.
+<../assets/comparison_image_1.png, id=103, 1084.05pt x 361.35pt>
+File: ../assets/comparison_image_1.png Graphic file (type png)
+<use ../assets/comparison_image_1.png>
+Package pdftex.def Info: ../assets/comparison_image_1.png  used on input line 175.
+(pdftex.def)             Requested size: 397.48499pt x 132.4954pt.
+<../assets/comparison_image_2.png, id=104, 1084.05pt x 361.35pt>
+File: ../assets/comparison_image_2.png Graphic file (type png)
+<use ../assets/comparison_image_2.png>
+Package pdftex.def Info: ../assets/comparison_image_2.png  used on input line 181.
+(pdftex.def)             Requested size: 397.48499pt x 132.4954pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [3 <../assets/mask.png>] [4 <../assets/comparison_image_0.png> <../assets/comparison_image_1.png> <../assets/comparison_image_2.png>]
+<../assets/pipeline.png, id=122, 5005.70125pt x 1614.03pt>
+File: ../assets/pipeline.png Graphic file (type png)
+<use ../assets/pipeline.png>
+Package pdftex.def Info: ../assets/pipeline.png  used on input line 219.
+(pdftex.def)             Requested size: 337.86465pt x 108.93001pt.
+<../assets/Training Loss and Validation Loss No opt.png, id=124, 578.16pt x 361.35pt>
+File: ../assets/Training Loss and Validation Loss No opt.png Graphic file (type png)
+<use ../assets/Training Loss and Validation Loss No opt.png>
+Package pdftex.def Info: ../assets/Training Loss and Validation Loss No opt.png  used on input line 230.
+(pdftex.def)             Requested size: 278.23827pt x 173.89815pt.
+ [5 <../assets/pipeline.png>]
+<../images/No_opt/full_sampling/full_sampling_0.png, id=137, 1626.075pt x 867.24pt>
+File: ../images/No_opt/full_sampling/full_sampling_0.png Graphic file (type png)
+<use ../images/No_opt/full_sampling/full_sampling_0.png>
+Package pdftex.def Info: ../images/No_opt/full_sampling/full_sampling_0.png  used on input line 240.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/full_sampling/full_sampling_1.png, id=138, 1626.075pt x 867.24pt>
+File: ../images/No_opt/full_sampling/full_sampling_1.png Graphic file (type png)
+<use ../images/No_opt/full_sampling/full_sampling_1.png>
+Package pdftex.def Info: ../images/No_opt/full_sampling/full_sampling_1.png  used on input line 244.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/full_sampling/full_sampling_2.png, id=139, 1626.075pt x 867.24pt>
+File: ../images/No_opt/full_sampling/full_sampling_2.png Graphic file (type png)
+<use ../images/No_opt/full_sampling/full_sampling_2.png>
+Package pdftex.def Info: ../images/No_opt/full_sampling/full_sampling_2.png  used on input line 248.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/under_sampling/under_sampling_0.png, id=140, 1626.075pt x 867.24pt>
+File: ../images/No_opt/under_sampling/under_sampling_0.png Graphic file (type png)
+<use ../images/No_opt/under_sampling/under_sampling_0.png>
+Package pdftex.def Info: ../images/No_opt/under_sampling/under_sampling_0.png  used on input line 258.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/under_sampling/under_sampling_1.png, id=141, 1626.075pt x 867.24pt>
+File: ../images/No_opt/under_sampling/under_sampling_1.png Graphic file (type png)
+<use ../images/No_opt/under_sampling/under_sampling_1.png>
+Package pdftex.def Info: ../images/No_opt/under_sampling/under_sampling_1.png  used on input line 262.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/under_sampling/under_sampling_2.png, id=142, 1626.075pt x 867.24pt>
+File: ../images/No_opt/under_sampling/under_sampling_2.png Graphic file (type png)
+<use ../images/No_opt/under_sampling/under_sampling_2.png>
+Package pdftex.def Info: ../images/No_opt/under_sampling/under_sampling_2.png  used on input line 266.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/reconstruction/reconstruction_0.png, id=143, 1626.075pt x 867.24pt>
+File: ../images/No_opt/reconstruction/reconstruction_0.png Graphic file (type png)
+<use ../images/No_opt/reconstruction/reconstruction_0.png>
+Package pdftex.def Info: ../images/No_opt/reconstruction/reconstruction_0.png  used on input line 276.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/reconstruction/reconstruction_1.png, id=144, 1626.075pt x 867.24pt>
+File: ../images/No_opt/reconstruction/reconstruction_1.png Graphic file (type png)
+<use ../images/No_opt/reconstruction/reconstruction_1.png>
+Package pdftex.def Info: ../images/No_opt/reconstruction/reconstruction_1.png  used on input line 280.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/No_opt/reconstruction/reconstruction_2.png, id=145, 1626.075pt x 867.24pt>
+File: ../images/No_opt/reconstruction/reconstruction_2.png Graphic file (type png)
+<use ../images/No_opt/reconstruction/reconstruction_2.png>
+Package pdftex.def Info: ../images/No_opt/reconstruction/reconstruction_2.png  used on input line 284.
+(pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+ [6 <../assets/Training Loss and Validation Loss No opt.png> <../images/No_opt/full_sampling/full_sampling_0.png> <../images/No_opt/full_sampling/full_sampling_1.png> <../images/No_opt/full_sampling/full_sampling_2.png> <../images/No_opt/under_sampling/under_sampling_0.png> <../images/No_opt/under_sampling/under_sampling_1.png> <../images/No_opt/under_sampling/under_sampling_2.png> <../images/No_opt/reconstruction/reconstruction_0.png> <../images/No_opt/reconstruction/reconstruction_1.png> <../images/No_opt/reconstruction/reconstruction_2.png>]
+Overfull \hbox (4.32373pt too wide) in paragraph at lines 318--327
+ [][] 
+ []
+
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 331.
+(e:/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+)
+<../assets/Training Loss and Validation Loss.png, id=168, 578.16pt x 361.35pt>
+File: ../assets/Training Loss and Validation Loss.png Graphic file (type png)
+<use ../assets/Training Loss and Validation Loss.png>
+Package pdftex.def Info: ../assets/Training Loss and Validation Loss.png  used on input line 344.
+(pdftex.def)             Requested size: 397.48499pt x 248.42752pt.
+ [7]
+<../images/compare.PNG, id=182, 228.25275pt x 115.02975pt>
+File: ../images/compare.PNG Graphic file (type png)
+<use ../images/compare.PNG>
+Package pdftex.def Info: ../images/compare.PNG  used on input line 351.
+(pdftex.def)             Requested size: 317.9892pt x 160.25421pt.
+
+Underfull \hbox (badness 3713) in paragraph at lines 357--361
+\T1/ptm/m/it/10 (+20) Note: \T1/ptm/m/n/10 (+20) De-tailed re-con-struc-tion im-ages, re-lated train-ing loss, val-i-da-tion loss and their
+ []
+
+
+Underfull \hbox (badness 6725) in paragraph at lines 357--361
+\T1/ptm/m/n/10 (+20) loss curves can be found in \T1/cmtt/m/n/10 assets/Training Loss and Validation Loss L1.png\T1/ptm/m/n/10 (+20) ,
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [8 <../assets/Training Loss and Validation Loss.png> <../images/compare.PNG>]
+<../assets/Training Loss and Validation Loss L1.png, id=193, 578.16pt x 361.35pt>
+File: ../assets/Training Loss and Validation Loss L1.png Graphic file (type png)
+<use ../assets/Training Loss and Validation Loss L1.png>
+Package pdftex.def Info: ../assets/Training Loss and Validation Loss L1.png  used on input line 396.
+(pdftex.def)             Requested size: 397.48499pt x 248.42752pt.
+ [9 <../assets/Training Loss and Validation Loss L1.png>]
+<../assets/Training Loss and Validation Loss Unrolled.png, id=202, 578.16pt x 361.35pt>
+File: ../assets/Training Loss and Validation Loss Unrolled.png Graphic file (type png)
+<use ../assets/Training Loss and Validation Loss Unrolled.png>
+Package pdftex.def Info: ../assets/Training Loss and Validation Loss Unrolled.png  used on input line 446.
+(pdftex.def)             Requested size: 397.48499pt x 248.42752pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [10] [11 <../assets/Training Loss and Validation Loss Unrolled.png>]
+Package pgfplots info on input line 497: Using 'lua backend=false' for axis: x coord trafo unsupported.
+
+Missing character: There is no ; in font nullfont!
+
+Overfull \hbox (31.6252pt too wide) in paragraph at lines 502--503
+ [][] 
+ []
+
+Package pgfplots info on input line 526: Using 'lua backend=false' for axis: x coord trafo unsupported.
+Missing character: There is no ; in font nullfont!
+
+Overfull \hbox (34.40297pt too wide) in paragraph at lines 531--532
+ [][] 
+ []
+
+[12] (build/report.aux)
+ ***********
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-03-14>
+ ***********
+Package rerunfilecheck Info: File `report.out' has not changed.
+(rerunfilecheck)             Checksum: D54BE03C91D0C7D7290059456CF02F4D;3893.
+ ) 
+Here is how much of TeX's memory you used:
+ 36698 strings out of 474104
+ 831255 string characters out of 5747503
+ 1954496 words of memory out of 5000000
+ 58253 multiletter control sequences out of 15000+600000
+ 593237 words of font info for 193 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 99i,19n,101p,1115b,2386s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><e:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb><e:/texlive/2024/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><e:/texlive/2024/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><e:/texlive/2024/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on build/report.pdf (12 pages, 18139153 bytes).
+PDF statistics:
+ 321 PDF objects out of 1000 (max. 8388607)
+ 234 compressed objects within 3 object streams
+ 70 named destinations out of 1000 (max. 500000)
+ 36081 words of extra memory for PDF output out of 42996 (max. 10000000)
+
