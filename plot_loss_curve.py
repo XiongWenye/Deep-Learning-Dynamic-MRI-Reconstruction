@@ -16,8 +16,8 @@ output_file_path = Path("./output/output.txt")
 output_file_path_L1 = Path("./output/L1_Loss_output.txt")
 output_file_path_No_Opt = Path("./output/No_Opt_output.txt")
 output_file_path_unrolled = Path("./output/unrolled_output.txt")
-output_file_path_No_res = Path("./output/no_res.txt")
-output_file_path_No_pipeline = Path("./output/no_pipeline.txt")
+output_file_path_With_attention = Path("./output/with_attention.txt")
+output_file_path_One_unet = Path("./output/one_unet.txt")
 
 with open(output_file_path, "r") as f:
     for line in f:
@@ -147,7 +147,7 @@ plt.close()
 
 train_losses = []
 val_losses = []
-with open(output_file_path_No_res, "r") as f:
+with open(output_file_path_With_attention, "r") as f:
     for line in f:
         if "Train Loss" in line and "Val Loss" in line:
             parts = line.strip().split(",")
@@ -160,19 +160,19 @@ with open(output_file_path_No_res, "r") as f:
             val_losses.append(val_loss)
 
 plt.figure(figsize=(8, 5))
-plt.plot(np.log(train_losses), label="Log Train Loss (No Residual)")
-plt.plot(np.log(val_losses), label="Log Validation Loss (No Residual)")
+plt.plot(np.log(train_losses), label="Log Train Loss")
+plt.plot(np.log(val_losses), label="Log Validation Loss")
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.title("Training and Validation Loss Curve (No Residual)")
+plt.title("Training and Validation Loss Curve with attention")
 plt.legend()
 plt.grid(True)
-plt.savefig(f"assets/Training Loss and Validation Loss No res.png")
+plt.savefig(f"assets/Training Loss and Validation Loss with attention.png")
 plt.close()
 
 train_losses = []
 val_losses = []
-with open(output_file_path_No_pipeline, "r") as f:
+with open(output_file_path_One_unet, "r") as f:
     for line in f:
         if "Train Loss" in line and "Val Loss" in line:
             parts = line.strip().split(",")
@@ -185,12 +185,12 @@ with open(output_file_path_No_pipeline, "r") as f:
             val_losses.append(val_loss)
 
 plt.figure(figsize=(8, 5))
-plt.plot(np.log(train_losses), label="Log Train Loss (No pipeline)")
-plt.plot(np.log(val_losses), label="Log Validation Loss (No pipeline)")
+plt.plot(np.log(train_losses), label="Log Train Loss")
+plt.plot(np.log(val_losses), label="Log Validation Loss")
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.title("Training and Validation Loss Curve (No pipeline)")
+plt.title("Training and Validation Loss Curve one unet")
 plt.legend()
 plt.grid(True)
-plt.savefig(f"assets/Training Loss and Validation Loss No pipeline.png")
+plt.savefig(f"assets/Training Loss and Validation Loss one unet.png")
 plt.close()

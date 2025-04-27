@@ -1,9 +1,9 @@
-PWD /Users/bearxiong/Documents/ShanghaiTech/BME1312_2025_spring/Project/Deep-Learning-Dynamic-MRI-Reconstruction/report
+PWD /Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report
 INPUT /usr/local/texlive/2024/texmf.cnf
 INPUT /usr/local/texlive/2024/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT /Users/bearxiong/Documents/ShanghaiTech/BME1312_2025_spring/Project/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex
-OUTPUT report.log
+INPUT /Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex
+OUTPUT build/report.log
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/base/size10.clo
@@ -156,18 +156,18 @@ INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/amsmath/amsbsy.sty
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/amsmath/amsopn.sty
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
-INPUT ./report.aux
-INPUT ./report.aux
-INPUT report.aux
-OUTPUT report.aux
-INPUT ./report.out
-INPUT ./report.out
-INPUT report.out
-INPUT report.out
-OUTPUT report.pdf
-INPUT ./report.out
-INPUT ./report.out
-OUTPUT report.out
+INPUT build/report.aux
+INPUT build/report.aux
+INPUT build/report.aux
+OUTPUT build/report.aux
+INPUT build/report.out
+INPUT build/report.out
+INPUT build/report.out
+INPUT build/report.out
+OUTPUT build/report.pdf
+INPUT build/report.out
+INPUT build/report.out
+OUTPUT build/report.out
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/microtype/mt-ptm.cfg
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/microtype/mt-ptm.cfg
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/microtype/mt-ptm.cfg
@@ -310,6 +310,11 @@ INPUT ../images/No_opt/reconstruction/reconstruction_2.png
 INPUT ../images/No_opt/reconstruction/reconstruction_2.png
 INPUT ../images/No_opt/reconstruction/reconstruction_2.png
 INPUT ../images/No_opt/reconstruction/reconstruction_2.png
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
+INPUT ../images/compare.PNG
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
@@ -330,9 +335,9 @@ INPUT ../assets/Training Loss and Validation Loss Unrolled.png
 INPUT ../assets/Training Loss and Validation Loss Unrolled.png
 INPUT ../assets/Training Loss and Validation Loss Unrolled.png
 INPUT ../assets/Training Loss and Validation Loss Unrolled.png
-INPUT report.aux
-INPUT ./report.out
-INPUT ./report.out
+INPUT build/report.aux
+INPUT build/report.out
+INPUT build/report.out
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb

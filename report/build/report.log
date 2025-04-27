@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.6)  27 APR 2025 00:31
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.20)  27 APR 2025 19:07
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/Users/bearxiong/Documents/ShanghaiTech/BME1312_2025_spring/Project/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex
-(/Users/bearxiong/Documents/ShanghaiTech/BME1312_2025_spring/Project/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex
+**/Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex
+(/Users/joywu/Desktop/bme1312/Deep-Learning-Dynamic-MRI-Reconstruction/report/report.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
 (/usr/local/texlive/2024/texmf-dist/tex/latex/base/article.cls
@@ -387,7 +387,7 @@ LaTeX Info: Redefining \] on input line 2954.
 File: l3backend-pdftex.def 2024-02-20 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count309
 \l__pdf_internal_box=\box58
-) (./report.aux)
+) (build/report.aux)
 \openout1 = `report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 76.
@@ -476,7 +476,7 @@ LaTeX Font Info:    ... okay on input line 76.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 Package hyperref Info: Link coloring OFF on input line 76.
-(./report.out) (./report.out)
+(build/report.out) (build/report.out)
 \@outlinefile=\write3
 \openout3 = `report.out'.
 
@@ -641,43 +641,54 @@ File: ../images/No_opt/reconstruction/reconstruction_2.png Graphic file (type pn
 <use ../images/No_opt/reconstruction/reconstruction_2.png>
 Package pdftex.def Info: ../images/No_opt/reconstruction/reconstruction_2.png  used on input line 281.
 (pdftex.def)             Requested size: 127.1981pt x 67.83235pt.
+<../images/compare.PNG, id=139, 228.25275pt x 115.02975pt>
+File: ../images/compare.PNG Graphic file (type png)
+<use ../images/compare.PNG>
+Package pdftex.def Info: ../images/compare.PNG  used on input line 290.
+(pdftex.def)             Requested size: 317.9892pt x 160.25421pt.
+
+Underfull \vbox (badness 6641) has occurred while \output is active []
+
  [6 <../assets/Training Loss and Validation Loss No opt.png> <../images/No_opt/full_sampling/full_sampling_0.png> <../images/No_opt/full_sampling/full_sampling_1.png> <../images/No_opt/full_sampling/full_sampling_2.png> <../images/No_opt/under_sampling/under_sampling_0.png> <../images/No_opt/under_sampling/under_sampling_1.png> <../images/No_opt/under_sampling/under_sampling_2.png> <../images/No_opt/reconstruction/reconstruction_0.png> <../images/No_opt/reconstruction/reconstruction_1.png> <../images/No_opt/reconstruction/reconstruction_2.png>]
-Overfull \hbox (4.32373pt too wide) in paragraph at lines 315--324
+Overfull \hbox (4.32373pt too wide) in paragraph at lines 322--331
  [][] 
  []
 
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 328.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 335.
 (/usr/local/texlive/2024/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-)
-<../assets/Training Loss and Validation Loss.png, id=161, 578.16pt x 361.35pt>
+) [7 <../images/compare.PNG>]
+<../assets/Training Loss and Validation Loss.png, id=173, 578.16pt x 361.35pt>
 File: ../assets/Training Loss and Validation Loss.png Graphic file (type png)
 <use ../assets/Training Loss and Validation Loss.png>
-Package pdftex.def Info: ../assets/Training Loss and Validation Loss.png  used on input line 341.
+Package pdftex.def Info: ../assets/Training Loss and Validation Loss.png  used on input line 348.
 (pdftex.def)             Requested size: 397.48499pt x 248.42752pt.
- [7]
-Underfull \hbox (badness 3713) in paragraph at lines 349--353
+
+Underfull \hbox (badness 3713) in paragraph at lines 356--360
 \T1/ptm/m/it/10 (+20) Note: \T1/ptm/m/n/10 (+20) De-tailed re-con-struc-tion im-ages, re-lated train-ing loss, val-i-da-tion loss and their
  []
 
 
-Underfull \hbox (badness 6725) in paragraph at lines 349--353
+Underfull \hbox (badness 6725) in paragraph at lines 356--360
 \T1/ptm/m/n/10 (+20) loss curves can be found in \T1/cmtt/m/n/10 assets/Training Loss and Validation Loss L1.png\T1/ptm/m/n/10 (+20) ,
  []
 
 [8 <../assets/Training Loss and Validation Loss.png>]
-<../assets/Training Loss and Validation Loss L1.png, id=183, 578.16pt x 361.35pt>
+<../assets/Training Loss and Validation Loss L1.png, id=186, 578.16pt x 361.35pt>
 File: ../assets/Training Loss and Validation Loss L1.png Graphic file (type png)
 <use ../assets/Training Loss and Validation Loss L1.png>
-Package pdftex.def Info: ../assets/Training Loss and Validation Loss L1.png  used on input line 388.
+Package pdftex.def Info: ../assets/Training Loss and Validation Loss L1.png  used on input line 395.
 (pdftex.def)             Requested size: 397.48499pt x 248.42752pt.
  [9 <../assets/Training Loss and Validation Loss L1.png>]
-<../assets/Training Loss and Validation Loss Unrolled.png, id=192, 578.16pt x 361.35pt>
+<../assets/Training Loss and Validation Loss Unrolled.png, id=195, 578.16pt x 361.35pt>
 File: ../assets/Training Loss and Validation Loss Unrolled.png Graphic file (type png)
 <use ../assets/Training Loss and Validation Loss Unrolled.png>
-Package pdftex.def Info: ../assets/Training Loss and Validation Loss Unrolled.png  used on input line 438.
+Package pdftex.def Info: ../assets/Training Loss and Validation Loss Unrolled.png  used on input line 445.
 (pdftex.def)             Requested size: 397.48499pt x 248.42752pt.
- [10 <../assets/Training Loss and Validation Loss Unrolled.png>] [11] (./report.aux)
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [10] [11 <../assets/Training Loss and Validation Loss Unrolled.png>] (build/report.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
@@ -686,18 +697,18 @@ Package rerunfilecheck Info: File `report.out' has not changed.
 (rerunfilecheck)             Checksum: 28098C334DBBAA31CAA8B958E3162D31;3799.
  ) 
 Here is how much of TeX's memory you used:
- 16223 strings out of 474116
- 262060 string characters out of 5743682
+ 16236 strings out of 474116
+ 262250 string characters out of 5743681
  1939187 words of memory out of 5000000
- 38124 multiletter control sequences out of 15000+600000
- 588365 words of font info for 178 fonts, out of 8000000 for 9000
+ 38132 multiletter control sequences out of 15000+600000
+ 588495 words of font info for 180 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,9n,79p,1119b,544s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,79p,1080b,521s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on report.pdf (11 pages, 17996780 bytes).
+Output written on build/report.pdf (11 pages, 18091966 bytes).
 PDF statistics:
- 269 PDF objects out of 1000 (max. 8388607)
- 196 compressed objects within 2 object streams
- 59 named destinations out of 1000 (max. 500000)
- 32984 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 272 PDF objects out of 1000 (max. 8388607)
+ 197 compressed objects within 2 object streams
+ 60 named destinations out of 1000 (max. 500000)
+ 32989 words of extra memory for PDF output out of 35830 (max. 10000000)
 
