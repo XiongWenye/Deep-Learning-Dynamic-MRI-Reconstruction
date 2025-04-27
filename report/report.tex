@@ -35,8 +35,11 @@
 \usepackage{graphicx}       % Required for including graphics
 \usepackage{subcaption}     % Required for subfigure environment
 \usepackage{listings}       % Required for lstlisting environment
-\usepackage{float}
+\usepackage{float}          % Enables tables to be rendered anywhere on the page
 \usepackage{amsmath}        % For math environments like equation
+\usepackage{pgfplots}       % For histogram
+\usepackage{tikz}           % For histogram
+\pgfplotsset{compat=1.18}
 
 
 \title{BME1312 Project1 Report: Deep Learning for MRI Reconstruction}
@@ -452,6 +455,78 @@ The performance metrics are compared with the original single network in Table \
         \end{enumerate}
 \end{itemize}
 Further investigation with more data, potentially a smaller base network, and extended training times would be necessary to fully assess the potential of this unrolled architecture for our specific problem.
+
+
+
+\section{Conclusion}
+In histogram \ref{fig:PSNR Values for Each Model} and \ref{fig:SSIM Values for Each Model}, we can have a visual comparison of the implementation of the models covered in this report.\\
+Noted that, in the following histogram:
+\begin{enumerate}
+  \item "M1" refers to: Baseline, Dual UNet + 3D ResNet with L2 Loss, no optimization.
+  \item "M2" refers to: Baseline with dropout and dynamic lr.
+  \item "M3" refers to: Baseline with L2 Loss replaced with L1 Loss.
+  \item "U1" refers to: Original unrolled denoising network.
+  \item "U2" refers to: Unrolled denoising network with 2 cascades.
+  \item "U3" refers to: Unrolled denoising network with 2 cascades.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}
+    [ybar, 
+    grid = major, major grid style = {dashed},
+    ymin = 0,
+    ylabel = {PSNR values},
+    title = {PSNR Values for Each Model},
+    bar width = .5cm,
+    width = 40cm,
+    height = 6cm,
+    symbolic x coords={M1, M2, M3, U1, U2, U3},
+    x = 2cm,
+    xtick = data,
+    nodes near coords,
+    nodes near coords style = {font = \fontsize{8}{12}\selectfont},
+    enlarge x limits = 0.2,
+    legend style = {at = {(0.5,-0.2)},anchor = north,legend columns = -1},
+    ] 
+    \addplot+ coordinates {(M1, 24.15) (M2, 29.08) (M3, 29.15) (U1, 28.87) (U2, 29.29) (U3, 28.96)}; 
+    \addplot+ coordinates {(M1, 1.86) (M2, 1.93) (M3, 2.24) (U1, 2.05) (U2, 1.93) (U3, 1.81)}; 
+    \legend{PSNR mean, PSNR std};
+    \end{axis} 
+  \end{tikzpicture}
+  \caption{PSNR Values for Each Model}
+  \label{fig:PSNR Values for Each Model}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}
+    [ybar, 
+    grid = major, major grid style = {dashed},
+    ymin = 0,
+    ylabel = {SSIM values},
+    title = {SSIM Values for Each Model},
+    bar width = .5cm,
+    width = 40cm,
+    height = 6cm,
+    symbolic x coords={M1, M2, M3, U1, U2, U3},
+    x = 2cm,
+    xtick = data,
+    nodes near coords,
+    nodes near coords style = {font = \fontsize{8}{12}\selectfont},
+    enlarge x limits = 0.2,
+    legend style = {at = {(0.5,-0.2)},anchor = north,legend columns = -1},
+    ] 
+    \addplot+ coordinates {(M1, 0.743) (M2, 0.844) (M3, 0.844) (U1, 0.834) (U2, 0.815) (U3, 0.807)}; 
+    \addplot+ coordinates {(M1, 0.037) (M2, 0.037) (M3, 0.042) (U1, 0.030) (U2, 0.037) (U3, 0.041)}; 
+    \legend{SSIM mean, SSIM std};
+    \end{axis} 
+  \end{tikzpicture}
+  \caption{SSIM Values for Each Model}
+  \label{fig:SSIM Values for Each Model}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
